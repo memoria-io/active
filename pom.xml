@@ -12,7 +12,7 @@
     <!--suppress MavenRedundantGroupId -->
     <groupId>io.memoria</groupId>
     <artifactId>active</artifactId>
-    <version>20.17.0</version>
+    <version>20.18.0</version>
     <packaging>pom</packaging>
 
     <name>${project.groupId}.${project.artifactId}</name>
@@ -24,7 +24,9 @@
     </organization>
 
     <modules>
-
+        <module>core</module>
+        <module>etcd</module>
+        <module>web</module>
     </modules>
 
     <properties>
@@ -64,16 +66,66 @@
 
     <dependencyManagement>
         <dependencies>
+            <!--======================================================================================== -->
+            <!-- Atom Dependencies -->
+            <!--======================================================================================== -->
+            <dependency>
+                <groupId>io.memoria.atom</groupId>
+                <artifactId>core</artifactId>
+                <version>${atom.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.memoria.atom</groupId>
+                <artifactId>sec</artifactId>
+                <version>${atom.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.memoria.atom</groupId>
+                <artifactId>text</artifactId>
+                <version>${atom.version}</version>
+            </dependency>
 
+            <!-- ===============================================================   -->
+            <!-- etcd Dependencies                                                 -->
+            <!-- ===============================================================   -->
+            <dependency>
+                <groupId>io.etcd</groupId>
+                <artifactId>jetcd-core</artifactId>
+                <version>0.7.5</version>
+            </dependency>
+            <!--======================================================================================== -->
+            <!-- Netty Dependencies -->
+            <!--======================================================================================== -->
+            <dependency>
+                <groupId>io.helidon.nima.webserver</groupId>
+                <artifactId>helidon-nima-webserver</artifactId>
+                <version>${helidon.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.helidon.nima.http2</groupId>
+                <artifactId>helidon-nima-http2-webserver</artifactId>
+                <version>${helidon.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.helidon.nima.webclient</groupId>
+                <artifactId>helidon-nima-webclient</artifactId>
+                <version>${helidon.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.helidon.nima.testing.junit5</groupId>
+                <artifactId>helidon-nima-testing-junit5-webserver</artifactId>
+                <version>${helidon.version}</version>
+                <scope>test</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
     <dependencies>
         <!--======================================================================================== -->
         <!-- Atom Dependencies -->
         <!--======================================================================================== -->
-<!--        <dependency>-->
-<!--            <groupId>io.memoria.atom</groupId>-->
-<!--            <artifactId>core</artifactId>-->
-<!--        </dependency>-->
+        <dependency>
+            <groupId>io.memoria.atom</groupId>
+            <artifactId>core</artifactId>
+        </dependency>
     </dependencies>
 </project>

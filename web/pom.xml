@@ -1,0 +1,52 @@
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>io.memoria</groupId>
+        <artifactId>active</artifactId>
+        <version>20.18.0</version>
+    </parent>
+    <groupId>io.memoria.active</groupId>
+    <artifactId>web</artifactId>
+    <version>20.18.0</version>
+    <packaging>jar</packaging>
+    <name>${project.groupId}.${project.artifactId}</name>
+    <description>Web Module</description>
+    <dependencies>
+        <!--======================================================================================== -->
+        <!-- Modules Dependencies -->
+        <!--======================================================================================== -->
+        <dependency>
+            <groupId>io.memoria.atom</groupId>
+            <artifactId>sec</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.memoria.atom</groupId>
+            <artifactId>text</artifactId>
+        </dependency>
+
+        <!--======================================================================================== -->
+        <!-- Netty Dependencies -->
+        <!--======================================================================================== -->
+        <dependency>
+            <groupId>io.helidon.nima.webserver</groupId>
+            <artifactId>helidon-nima-webserver</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.helidon.nima.http2</groupId>
+            <artifactId>helidon-nima-http2-webserver</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.helidon.nima.webclient</groupId>
+            <artifactId>helidon-nima-webclient</artifactId>
+        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>io.helidon.nima.testing.junit5</groupId>-->
+<!--            <artifactId>helidon-nima-testing-junit5-webserver</artifactId>-->
+<!--            <scope>test</scope>-->
+<!--        </dependency>-->
+    </dependencies>
+</project>
+
