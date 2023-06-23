@@ -1,0 +1,52 @@
+###################
+# Generic
+###################
+*.class
+*.log
+
+###################
+# Java
+###################
+*.jar
+**/target/
+###################
+# IDEA
+###################
+.idea/
+/bin/
+*.iml
+*.attach_pid*
+
+###################
+# EMACS & Ensime
+###################
+.ensime
+.ensime_cache
+
+
+###################
+# Javascript
+###################
+node_modules
+dist
+.tmp
+.sass-cache
+bower_components
+test/bower_components
+*~
+.#*
+app/*~
+app/styles/*.css
+app/content/*/*.*
+!app/content/*.md
+
+##################
+# Mac
+##################
+__MACOSX
+*.DS_Store
+
+################
+# Maven
+################
+pom.xml.versionBackup
