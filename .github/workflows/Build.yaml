@@ -41,9 +41,8 @@ jobs:
           -Dsonar.organization=memoria-io \
           -Dsonar.projectKey=memoria-io_active
 
-
-          -Dsonar.pullrequest.github.repository=${{ GITHUB_REPOSITORY }}
-          -Dsonar.pullrequest.branch=${{ GITHUB_HEAD_REF#refs/heads/ }}
-          -Dsonar.pullrequest.base=${{ GITHUB_BASE_REF#refs/heads/ }} \
-          -Dsonar.pullrequest.key=${{ github.event.number }}
+#          -Dsonar.pullrequest.github.repository=${{ GITHUB_REPOSITORY }}
+#          -Dsonar.pullrequest.branch=${{ GITHUB_HEAD_REF#refs/heads/ }}
+#          -Dsonar.pullrequest.base=${{ GITHUB_BASE_REF#refs/heads/ }} \
+#          -Dsonar.pullrequest.key=${{ github.event.number }}
 
