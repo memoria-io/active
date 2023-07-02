@@ -6,13 +6,13 @@
     <parent>
         <groupId>io.memoria</groupId>
         <artifactId>atom</artifactId>
-        <version>20.14.0</version>
+        <version>20.15.0</version>
     </parent>
 
     <!--suppress MavenRedundantGroupId -->
     <groupId>io.memoria</groupId>
     <artifactId>active</artifactId>
-    <version>20.20.0</version>
+    <version>20.21.0</version>
     <packaging>pom</packaging>
 
     <name>${project.groupId}.${project.artifactId}</name>
@@ -30,7 +30,7 @@
     </modules>
 
     <properties>
-        <atom.version>20.14.0</atom.version>
+        <atom.version>20.15.0</atom.version>
         <helidon.version>4.0.0-ALPHA6</helidon.version>
         <jsonwebtoken.version>0.11.5</jsonwebtoken.version>
         <sonar.coverage.exclusions>
