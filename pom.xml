@@ -6,13 +6,13 @@
     <parent>
         <groupId>io.memoria</groupId>
         <artifactId>atom</artifactId>
-        <version>20.15.0</version>
+        <version>20.16.2</version>
     </parent>
 
     <!--suppress MavenRedundantGroupId -->
     <groupId>io.memoria</groupId>
     <artifactId>active</artifactId>
-    <version>20.21.0</version>
+    <version>20.22.0</version>
     <packaging>pom</packaging>
 
     <name>${project.groupId}.${project.artifactId}</name>
@@ -25,12 +25,13 @@
 
     <modules>
         <module>core</module>
+        <module>eventsourcing</module>
         <module>etcd</module>
         <module>web</module>
     </modules>
 
     <properties>
-        <atom.version>20.15.0</atom.version>
+        <atom.version>20.16.2</atom.version>
         <helidon.version>4.0.0-ALPHA6</helidon.version>
         <jsonwebtoken.version>0.11.5</jsonwebtoken.version>
         <sonar.coverage.exclusions>
@@ -72,6 +73,11 @@
             <dependency>
                 <groupId>io.memoria.atom</groupId>
                 <artifactId>core</artifactId>
+                <version>${atom.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.memoria.atom</groupId>
+                <artifactId>eventsourcing</artifactId>
                 <version>${atom.version}</version>
             </dependency>
             <dependency>
