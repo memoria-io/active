@@ -1,5 +1,6 @@
 package io.memoria.active.core.repo;
 
+import io.memoria.active.core.repo.kv.KVStore;
 import io.vavr.collection.List;
 import org.junit.jupiter.api.Test;
 

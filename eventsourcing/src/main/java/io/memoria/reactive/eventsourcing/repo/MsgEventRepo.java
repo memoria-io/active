@@ -1,13 +1,12 @@
 package io.memoria.reactive.eventsourcing.repo;
 
+import io.memoria.active.core.repo.msg.Msg;
+import io.memoria.active.core.repo.msg.MsgRepo;
 import io.memoria.atom.core.text.TextTransformer;
 import io.memoria.atom.eventsourcing.Event;
-import io.memoria.reactive.core.msg.stream.Msg;
-import io.memoria.reactive.core.msg.stream.MsgStream;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-
-import static io.memoria.reactive.core.reactor.ReactorUtils.tryToMono;
+import io.memoria.reactive.eventsourcing.AtomUtils;
+import io.vavr.collection.List;
+import io.vavr.control.Try;
 
 class MsgEventRepo<E extends Event> implements EventRepo<E> {
 
@@ -22,25 +21,25 @@ class MsgEventRepo<E extends Event> implements EventRepo<E> {
   }
 
   @Override
-  public Mono<E> last(String topic, int partition) {
-    return msgRepo.last(topic, partition).flatMap(this::toCmd);
+  public Try<E> append(String topic, int seqId, E cmd) {
+    return toMsg(seqId, cmd).flatMap(msg -> msgRepo.append(topic, msg)).map(msg -> cmd);
   }
 
   @Override
-  public Mono<E> pub(String topic, int partition, E cmd) {
-    return toMsg(cmd).flatMap(msg -> msgRepo.pub(topic, partition, msg)).map(msg -> cmd);
+  public Try<List<E>> getAll(String topic, String aggId) {
+    return msgRepo.getAll(topic, aggId).map(list -> list.map(this::toCmd)).flatMap(AtomUtils::toListOfTry);
   }
 
   @Override
-  public Flux<E> sub(String topic, int partition) {
-    return msgRepo.sub(topic, partition).concatMap(this::toCmd);
+  public Try<Integer> size(String topic, String aggId) {
+    return msgRepo.size(topic, aggId);
   }
 
-  Mono<Msg> toMsg(E cmd) {
-    return tryToMono(() -> transformer.serialize(cmd)).map(value -> new Msg(cmd.commandId().id().value(), value));
+  Try<Msg> toMsg(int seqId, E cmd) {
+    return transformer.serialize(cmd).map(value -> new Msg(cmd.stateId().id().value(), seqId, value));
   }
 
-  Mono<E> toCmd(Msg msg) {
-    return tryToMono(() -> transformer.deserialize(msg.value(), cClass));
+  Try<E> toCmd(Msg msg) {
+    return transformer.deserialize(msg.value(), cClass);
   }
 }

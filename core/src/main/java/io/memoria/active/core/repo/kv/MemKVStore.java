@@ -1,4 +1,4 @@
-package io.memoria.active.core.repo;
+package io.memoria.active.core.repo.kv;
 
 import io.vavr.control.Option;
 import io.vavr.control.Try;

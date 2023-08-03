@@ -1,13 +1,12 @@
 package io.memoria.reactive.eventsourcing.repo;
 
+import io.memoria.active.core.repo.msg.Msg;
+import io.memoria.active.core.repo.msg.MsgRepo;
 import io.memoria.atom.core.text.TextTransformer;
 import io.memoria.atom.eventsourcing.Command;
-import io.memoria.reactive.core.msg.stream.Msg;
-import io.memoria.reactive.core.msg.stream.MsgStream;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-
-import static io.memoria.reactive.core.reactor.ReactorUtils.tryToMono;
+import io.memoria.reactive.eventsourcing.AtomUtils;
+import io.vavr.collection.List;
+import io.vavr.control.Try;
 
 class MsgCommandRepo<C extends Command> implements CommandRepo<C> {
 
@@ -22,20 +21,20 @@ class MsgCommandRepo<C extends Command> implements CommandRepo<C> {
   }
 
   @Override
-  public Mono<C> pub(String topic, int partition, C cmd) {
-    return toMsg(cmd).flatMap(msg -> msgRepo.pub(topic, partition, msg)).map(msg -> cmd);
+  public Try<C> append(String topic, int seqId, C cmd) {
+    return toMsg(seqId, cmd).flatMap(msg -> msgRepo.append(topic, msg)).map(msg -> cmd);
   }
 
   @Override
-  public Flux<C> sub(String topic, int partition) {
-    return msgRepo.sub(topic, partition).concatMap(this::toCmd);
+  public Try<List<C>> getAll(String topic, String aggId) {
+    return msgRepo.getAll(topic, aggId).map(list -> list.map(this::toCmd)).flatMap(AtomUtils::toListOfTry);
   }
 
-  Mono<Msg> toMsg(C cmd) {
-    return tryToMono(() -> transformer.serialize(cmd)).map(value -> new Msg(cmd.commandId().id().value(), value));
+  Try<Msg> toMsg(int seqId, C cmd) {
+    return transformer.serialize(cmd).map(value -> new Msg(cmd.stateId().id().value(), seqId, value));
   }
 
-  Mono<C> toCmd(Msg msg) {
-    return tryToMono(() -> transformer.deserialize(msg.value(), cClass));
+  Try<C> toCmd(Msg msg) {
+    return transformer.deserialize(msg.value(), cClass);
   }
 }

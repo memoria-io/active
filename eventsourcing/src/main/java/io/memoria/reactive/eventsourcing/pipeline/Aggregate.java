@@ -1,4 +1,4 @@
-package io.memoria.reactive.eventsourcing;
+package io.memoria.reactive.eventsourcing.pipeline;
 
 import io.memoria.atom.eventsourcing.Command;
 import io.memoria.atom.eventsourcing.Event;
