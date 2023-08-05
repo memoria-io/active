@@ -27,7 +27,7 @@ class MsgCommandRepo<C extends Command> implements CommandRepo<C> {
 
   @Override
   public Try<List<C>> getAll(String topic, String aggId) {
-    return msgRepo.getAll(topic, aggId).map(list -> list.map(this::toCmd)).flatMap(AtomUtils::toListOfTry);
+    return msgRepo.fetch(topic, aggId).map(list -> list.map(this::toCmd)).flatMap(AtomUtils::toListOfTry);
   }
 
   Try<Msg> toMsg(int seqId, C cmd) {

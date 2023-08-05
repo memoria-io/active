@@ -1,6 +1,5 @@
 package io.memoria.active.core.stream;
 
-import io.vavr.control.Try;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -8,22 +7,22 @@ import org.junit.jupiter.api.Test;
 import java.time.Duration;
 import java.util.concurrent.atomic.AtomicInteger;
 
-class MemStreamTest {
+class NodeStreamTest {
   private static final int count = 10_000;
-  private final MemStream<Integer> q = new MemStream<>();
+  private final NodeStream<Integer> stream = NodeStream.inMemory();
 
   @Test
   @DisplayName("Stream single item")
   void streamOneElement() {
     Thread.startVirtualThread(() -> {
       for (int i = 0; i < 1; i++) {
-        q.add(i);
+        stream.append(i);
       }
     });
 
     AtomicInteger idx = new AtomicInteger(0);
-    q.stream().take(1).forEach(i -> {
-      assert i == idx.getAndIncrement();
+    stream.stream().take(1).forEach(i -> {
+      assert i.get() == idx.getAndIncrement();
     });
   }
 
@@ -32,13 +31,13 @@ class MemStreamTest {
   void stream() {
     Thread.startVirtualThread(() -> {
       for (int i = 0; i < count; i++) {
-        q.add(i);
+        stream.append(i);
       }
     });
 
     AtomicInteger idx = new AtomicInteger(0);
-    q.stream().take(count).forEach(i -> {
-      assert i == idx.getAndIncrement();
+    stream.stream().take(count).forEach(i -> {
+      assert i.get() == idx.getAndIncrement();
     });
   }
 
@@ -48,12 +47,12 @@ class MemStreamTest {
     Thread.startVirtualThread(() -> {
       try {
         Thread.sleep(200);
-        q.add(1);
-        q.add(2);
+        stream.append(1);
+        stream.append(2);
       } catch (InterruptedException e) {
         throw new RuntimeException(e);
       }
     });
-    Awaitility.await().timeout(Duration.ofMillis(250)).until(() -> q.stream().take(2).length() == 2);
+    Awaitility.await().timeout(Duration.ofMillis(250)).until(() -> stream.stream().take(2).length() == 2);
   }
 }

@@ -27,7 +27,7 @@ class MsgEventRepo<E extends Event> implements EventRepo<E> {
 
   @Override
   public Try<List<E>> getAll(String topic, String aggId) {
-    return msgRepo.getAll(topic, aggId).map(list -> list.map(this::toCmd)).flatMap(AtomUtils::toListOfTry);
+    return msgRepo.fetch(topic, aggId).map(list -> list.map(this::toCmd)).flatMap(AtomUtils::toListOfTry);
   }
 
   @Override

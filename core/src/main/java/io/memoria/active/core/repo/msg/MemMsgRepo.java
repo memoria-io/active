@@ -25,9 +25,11 @@ class MemMsgRepo implements MsgRepo {
   }
 
   @Override
-  public Try<List<Msg>> getAll(String topic, String aggId) {
-    var list = getAgg(topic, aggId).getOrElse(ArrayList::new);
-    return Try.success(List.ofAll(list));
+  public Try<List<Msg>> fetch(String topic, String aggId, int fromSeqId, int toSeqId) {
+    var list = getAgg(topic, aggId).map(List::ofAll)
+                                   .map(l -> l.subSequence(fromSeqId, toSeqId))
+                                   .getOrElse(List.empty());
+    return Try.success(list);
   }
 
   @Override

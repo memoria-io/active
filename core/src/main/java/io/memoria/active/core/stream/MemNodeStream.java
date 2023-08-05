@@ -1,6 +1,7 @@
 package io.memoria.active.core.stream;
 
 import io.vavr.collection.Stream;
+import io.vavr.control.Try;
 
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
@@ -11,20 +12,21 @@ import java.util.concurrent.locks.ReentrantLock;
  * This combines BlockingDeque and iterables where it Blocks on next element, while it keeps all elements in memory for
  * replaying, and streams any new added elements to listeners.
  */
-public class MemStream<T> {
+class MemNodeStream<T> implements NodeStream<T> {
   private final ReentrantLock lock;
   private final CountDownLatch latch;
   private final AtomicReference<Node<T>> first;
   private final AtomicReference<Node<T>> last;
 
-  public MemStream() {
+  public MemNodeStream() {
     this.lock = new ReentrantLock();
     this.latch = new CountDownLatch(1);
     this.first = new AtomicReference<>();
     this.last = new AtomicReference<>();
   }
 
-  public void add(T t) {
+  @Override
+  public void append(T t) {
     Objects.requireNonNull(t);
     this.lock.lock();
     var node = new Node<>(t);
@@ -39,12 +41,12 @@ public class MemStream<T> {
     this.lock.unlock();
   }
 
-  public Stream<T> stream() {
-    try {
+  @Override
+  public Stream<Try<T>> stream() {
+    var f = Try.of(() -> {
       latch.await();
-    } catch (InterruptedException e) {
-      throw new RuntimeException(e);
-    }
-    return Stream.iterate(first.get(), t -> t.tail().get()).map(Node::head);
+      return first.get();
+    });
+    return Stream.iterate(f, t -> t.map(n -> n.tail().get())).map(tr -> tr.map(Node::head));
   }
 }

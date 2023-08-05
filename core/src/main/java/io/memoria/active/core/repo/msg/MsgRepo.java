@@ -7,7 +7,7 @@ public interface MsgRepo extends AutoCloseable {
 
   Try<Msg> append(String topic, Msg msg);
 
-  Try<List<Msg>> getAll(String topic, String aggId);
+  Try<List<Msg>> fetch(String topic, String aggId, int fromSeqId, int to);
 
   Try<Integer> size(String topic, String aggId);
 
