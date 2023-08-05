@@ -43,10 +43,10 @@ class MemNodeStream<T> implements NodeStream<T> {
 
   @Override
   public Stream<Try<T>> stream() {
-    var f = Try.of(() -> {
+    var firstTry = Try.of(() -> {
       latch.await();
       return first.get();
     });
-    return Stream.iterate(f, t -> t.map(n -> n.tail().get())).map(tr -> tr.map(Node::head));
+    return Stream.iterate(firstTry, t -> t.map(node -> node.tail().get())).map(tr -> tr.map(Node::head));
   }
 }
