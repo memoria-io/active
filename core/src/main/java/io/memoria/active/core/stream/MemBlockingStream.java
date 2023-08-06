@@ -3,81 +3,30 @@ package io.memoria.active.core.stream;
 import io.vavr.collection.Stream;
 import io.vavr.control.Try;
 
-import java.util.Objects;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.HashMap;
+import java.util.Map;
 
-/**
- * This combines BlockingDeque and iterables where it Blocks on next element, while it keeps all elements in memory for
- * replaying, and streams any new added elements to listeners.
- */
-class MemBlockingStream<T> implements BlockingStream<T> {
-  private final ReentrantLock lock;
-  private final CountDownLatch latch;
-  private final AtomicReference<Node<T>> first;
-  private final AtomicReference<Node<T>> last;
+class MemBlockingStream implements BlockingStream {
+  private final Map<String, Map<Integer, BlockingChain<String>>> topics;
 
   public MemBlockingStream() {
-    this.lock = new ReentrantLock();
-    this.latch = new CountDownLatch(1);
-    this.first = new AtomicReference<>();
-    this.last = new AtomicReference<>();
+    topics = new HashMap<>();
   }
 
   @Override
-  public Try<T> append(T msg) {
-    Objects.requireNonNull(msg);
-    this.lock.lock();
-    var node = new Node<>(msg);
-    var casFirst = this.first.compareAndSet(null, node);
-    if (casFirst) {
-      this.last.set(node);
-      this.latch.countDown();
-    } else {
-      this.last.get().add(node);
-      this.last.set(node);
-    }
-    this.lock.unlock();
-    return Try.success(msg);
+  public Try<String> append(String topic, int partition, String msg) {
+    addTopic(topic, partition);
+    return this.topics.get(topic).get(partition).append(msg);
   }
+
 
   @Override
-  public Stream<Try<T>> stream() {
-    var firstTry = Try.of(() -> {
-      latch.await();
-      return first.get();
-    });
-    return Stream.iterate(firstTry, t -> t.map(node -> node.tail().get())).map(tr -> tr.map(Node::head));
+  public Stream<Try<String>> stream(String topic, int partition) {
+    addTopic(topic,partition);
+    return this.topics.get(topic).get(partition).stream();
   }
-
-  static class Node<T> {
-    private final T head;
-    private final CountDownLatch countDownLatch;
-    private final AtomicReference<Node<T>> next;
-
-    public Node(T head) {
-      this.head = head;
-      this.countDownLatch = new CountDownLatch(1);
-      this.next = new AtomicReference<>();
-    }
-
-    public boolean add(Node<T> next) {
-      var cas = this.next.compareAndSet(null, next);
-      if (cas)
-        this.countDownLatch.countDown();
-      return cas;
-    }
-
-    public T head() {
-      return head;
-    }
-
-    public Try<Node<T>> tail() {
-      return Try.of(() -> {
-        this.countDownLatch.await();
-        return this.next.get();
-      });
-    }
+  private void addTopic(String topic, int partition) {
+    this.topics.computeIfAbsent(topic, k -> new HashMap<>());
+    this.topics.get(topic).computeIfAbsent(partition, k -> BlockingChain.inMemory());
   }
 }

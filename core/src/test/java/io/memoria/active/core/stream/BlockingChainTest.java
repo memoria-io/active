@@ -7,9 +7,9 @@ import org.junit.jupiter.api.Test;
 import java.time.Duration;
 import java.util.concurrent.atomic.AtomicInteger;
 
-class BlockingStreamTest {
+class BlockingChainTest {
   private static final int count = 10_000;
-  private final BlockingStream<Integer> stream = BlockingStream.inMemory();
+  private final BlockingChain<Integer> stream = BlockingChain.inMemory();
 
   @Test
   @DisplayName("Stream single item")

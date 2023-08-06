@@ -3,12 +3,8 @@ package io.memoria.active.core.stream;
 import io.vavr.collection.Stream;
 import io.vavr.control.Try;
 
-public interface BlockingStream<T> {
-  Try<T> append(T t);
+public interface BlockingStream {
+  Try<String> append(String topic, int partition, String msg);
 
-  Stream<Try<T>> stream();
-
-  static <T> BlockingStream<T> inMemory() {
-    return new MemBlockingStream<>();
-  }
+  Stream<Try<String>> stream(String topic, int partition);
 }

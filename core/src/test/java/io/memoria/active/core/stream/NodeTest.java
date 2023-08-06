@@ -9,7 +9,7 @@ import java.time.Duration;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class NodeTest {
-  private final MemBlockingStream.Node<String> node = new MemBlockingStream.Node<>("hello");
+  private final MemBlockingChain.Node<String> node = new MemBlockingChain.Node<>("hello");
 
   @Test
   @DisplayName("Should block until tail is added")
@@ -17,7 +17,7 @@ class NodeTest {
     Thread.startVirtualThread(() -> {
       try {
         Thread.sleep(200);
-        node.add(new MemBlockingStream.Node<>("world"));
+        node.add(new MemBlockingChain.Node<>("world"));
       } catch (InterruptedException e) {
         throw new RuntimeException(e);
       }
@@ -29,7 +29,7 @@ class NodeTest {
   @DisplayName("Should only add tail once and never change")
   void tailCAS() {
     for (int i = 0; i < 10; i++) {
-      var result = node.add(new MemBlockingStream.Node<>("i=" + i));
+      var result = node.add(new MemBlockingChain.Node<>("i=" + i));
       if (i == 0) {
         assert result;
       } else {
