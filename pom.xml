@@ -27,6 +27,7 @@
         <module>core</module>
         <module>eventsourcing</module>
         <module>kafka</module>
+        <module>nats</module>
         <module>etcd</module>
         <module>web</module>
     </modules>
