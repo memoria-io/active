@@ -26,6 +26,7 @@
     <modules>
         <module>core</module>
         <module>eventsourcing</module>
+        <module>kafka</module>
         <module>etcd</module>
         <module>web</module>
     </modules>
@@ -92,8 +93,18 @@
             </dependency>
 
             <!-- ===============================================================   -->
-            <!-- etcd Dependencies                                                 -->
+            <!-- Adapters Dependencies                                                 -->
             <!-- ===============================================================   -->
+            <dependency>
+                <groupId>org.apache.kafka</groupId>
+                <artifactId>kafka-clients</artifactId>
+                <version>3.5.1</version>
+            </dependency>
+            <dependency>
+                <groupId>io.nats</groupId>
+                <artifactId>jnats</artifactId>
+                <version>2.16.13</version>
+            </dependency>
             <dependency>
                 <groupId>io.etcd</groupId>
                 <artifactId>jetcd-core</artifactId>
