@@ -8,7 +8,7 @@ import java.util.function.Function;
 
 public class AtomUtils {
 
-  private AtomUtils(){}
+  private AtomUtils() {}
 
   public static <T, E> Function<Option<T>, Try<Option<E>>> optToTryOpt(Function<T, Try<E>> fn) {
     return opt -> optToTryOpt(opt, fn);

@@ -19,12 +19,12 @@ class MemBlockingStream implements BlockingStream {
     return this.topics.get(topic).get(partition).append(msg);
   }
 
-
   @Override
   public Stream<Try<String>> stream(String topic, int partition) {
-    addTopic(topic,partition);
+    addTopic(topic, partition);
     return this.topics.get(topic).get(partition).stream();
   }
+
   private void addTopic(String topic, int partition) {
     this.topics.computeIfAbsent(topic, k -> new HashMap<>());
     this.topics.get(topic).computeIfAbsent(partition, k -> BlockingChain.inMemory());

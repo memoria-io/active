@@ -7,6 +7,8 @@ import org.junit.jupiter.api.Test;
 import java.time.Duration;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 class BlockingChainTest {
   private static final int count = 10_000;
   private final BlockingChain<Integer> stream = BlockingChain.inMemory();
@@ -22,7 +24,7 @@ class BlockingChainTest {
 
     AtomicInteger idx = new AtomicInteger(0);
     stream.stream().take(1).forEach(i -> {
-      assert i.get() == idx.getAndIncrement();
+      assertThat(i.get()).isEqualTo(idx.getAndIncrement());
     });
   }
 
@@ -37,7 +39,7 @@ class BlockingChainTest {
 
     AtomicInteger idx = new AtomicInteger(0);
     stream.stream().take(count).forEach(i -> {
-      assert i.get() == idx.getAndIncrement();
+      assertThat(i.get()).isEqualTo(idx.getAndIncrement());
     });
   }
 
