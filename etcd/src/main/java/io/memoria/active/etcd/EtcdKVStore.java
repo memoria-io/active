@@ -12,7 +12,6 @@ import java.time.Duration;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.function.Function;
 
 public class EtcdKVStore implements KVStore {
   private final KV kv;
@@ -27,8 +26,8 @@ public class EtcdKVStore implements KVStore {
    * @return first value of such key and ignores any other
    */
   @Override
-  public Try<String> get(String key) {
-    return Try.of(() -> getValue(key).toTry()).flatMap(Function.identity());
+  public Try<Option<String>> get(String key) {
+    return Try.of(() -> getValue(key));
   }
 
   /**

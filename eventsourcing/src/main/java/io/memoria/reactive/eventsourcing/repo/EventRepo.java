@@ -35,7 +35,7 @@ public class EventRepo<E extends Event> {
   }
 
   Try<SeqRow> toRow(int seqId, E event) {
-    return transformer.serialize(event).map(eventStr -> new SeqRow(event.stateId().id().value(), seqId, eventStr));
+    return transformer.serialize(event).map(eventStr -> new SeqRow(event.meta().stateId().id().value(), seqId, eventStr));
   }
 }
 

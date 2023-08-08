@@ -18,8 +18,8 @@ class MemKVStore implements KVStore {
   }
 
   @Override
-  public Try<String> get(String key) {
-    return Option.of(store.get(key)).toTry();
+  public Try<Option<String>> get(String key) {
+    return Try.of(() -> Option.of(store.get(key)));
   }
 
   @Override

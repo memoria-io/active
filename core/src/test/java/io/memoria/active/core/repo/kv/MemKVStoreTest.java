@@ -1,6 +1,7 @@
 package io.memoria.active.core.repo.kv;
 
 import io.vavr.collection.List;
+import io.vavr.control.Option;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -15,7 +16,7 @@ class MemKVStoreTest {
 
     // When
     var setKV = List.range(0, count).flatMap(i -> kvStore.set(toKey(i), toValue(i))).toJavaList();
-    var getKV = List.range(0, count).flatMap(i -> kvStore.get(toKey(i))).toJavaList();
+    var getKV = List.range(0, count).flatMap(i -> kvStore.get(toKey(i))).map(Option::get).toJavaList();
 
     // Then
     var expectedValues = List.range(0, count).map(MemKVStoreTest::toValue).toJavaList();

@@ -2,8 +2,8 @@ package io.memoria.active.etcd;
 
 import io.etcd.jetcd.Client;
 import io.vavr.collection.List;
+import io.vavr.control.Option;
 import io.vavr.control.Try;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
@@ -19,24 +19,22 @@ class EtcdKVStoreTest {
   private final EtcdKVStore kvStore = new EtcdKVStore(client, Duration.ofMillis(200));
 
   @Test
-  @Disabled
   void getAndPut() {
     // Given
     int count = 10;
 
     // When
     var setKV = List.range(0, count).map(i -> kvStore.set(toKey(i), toValue(i))).map(Try::get).toJavaList();
-    var getKV = List.range(0, count).flatMap(i -> kvStore.get(toKey(i))).toJavaList();
+    var getKV = List.range(0, count).flatMap(i -> kvStore.get(toKey(i))).map(Option::get).toJavaList();
 
     // Then
-    assertThat(setKV.size()).isEqualTo(count);
+    assertThat(setKV).hasSize(count);
 
     var expectedValues = List.range(0, count).map(EtcdKVStoreTest::toValue).toJavaList();
     assertThat(getKV).hasSameElementsAs(expectedValues);
   }
 
   @Test
-  @Disabled
   void notFound() {
     assertThat(kvStore.get("some_value").getCause()).isInstanceOf(NoSuchElementException.class);
   }

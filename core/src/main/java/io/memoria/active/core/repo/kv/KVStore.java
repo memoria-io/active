@@ -1,11 +1,12 @@
 package io.memoria.active.core.repo.kv;
 
+import io.vavr.control.Option;
 import io.vavr.control.Try;
 
 import java.util.Map;
 
 public interface KVStore {
-  Try<String> get(String key);
+  Try<Option<String>> get(String key);
 
   Try<String> set(String key, String value);
 
