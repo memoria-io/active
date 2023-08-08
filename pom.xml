@@ -6,7 +6,7 @@
     <parent>
         <groupId>io.memoria</groupId>
         <artifactId>atom</artifactId>
-        <version>20.19.2</version>
+        <version>20.20.0</version>
     </parent>
 
     <!--suppress MavenRedundantGroupId -->
@@ -33,7 +33,7 @@
     </modules>
 
     <properties>
-        <atom.version>20.19.2</atom.version>
+        <atom.version>20.20.0</atom.version>
         <helidon.version>4.0.0-ALPHA6</helidon.version>
         <jsonwebtoken.version>0.11.5</jsonwebtoken.version>
         <sonar.coverage.exclusions>

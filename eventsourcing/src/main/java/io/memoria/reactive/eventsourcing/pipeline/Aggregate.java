@@ -1,7 +1,7 @@
 package io.memoria.reactive.eventsourcing.pipeline;
 
-import io.memoria.active.core.repo.IdRepo;
 import io.memoria.atom.eventsourcing.Command;
+import io.memoria.atom.eventsourcing.CommandId;
 import io.memoria.atom.eventsourcing.Domain;
 import io.memoria.atom.eventsourcing.Event;
 import io.memoria.atom.eventsourcing.State;
@@ -11,7 +11,8 @@ import io.vavr.collection.Stream;
 import io.vavr.control.Option;
 import io.vavr.control.Try;
 
-import java.util.NoSuchElementException;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -22,20 +23,19 @@ public class Aggregate<S extends State, C extends Command, E extends Event> {
   private final EventRepo<E> eventRepo;
   private final CommandRoute commandRoute;
   private final CommandStream<C> commandStream;
-  private final IdRepo processedCommands;
+  private final Set<CommandId> processedCommands;
 
   public Aggregate(Domain<S, C, E> domain,
                    EventRepo<E> eventRepo,
                    CommandRoute commandRoute,
-                   CommandStream<C> commandStream,
-                   IdRepo processedCommands) {
+                   CommandStream<C> commandStream) {
     this.domain = domain;
-    this.processedCommands = processedCommands;
     this.state = new AtomicReference<>();
     this.eventSeqId = new AtomicInteger();
     this.eventRepo = eventRepo;
     this.commandRoute = commandRoute;
     this.commandStream = commandStream;
+    this.processedCommands = new HashSet<>();
   }
 
   public Stream<Try<E>> init(String aggId) {
@@ -43,18 +43,10 @@ public class Aggregate<S extends State, C extends Command, E extends Event> {
   }
 
   public Try<Option<E>> handle(C cmd) {
-    return processedCommands.exists(cmd.meta().commandId().id()).flatMap(exists -> handleCommand(cmd, exists));
-  }
-
-  private Try<Option<E>> handleCommand(C cmd, boolean exists) {
-    if (exists) {
-      return Try.success(Option.none());
+    if (processedCommands.contains(cmd.meta().commandId())) {
+      return Try.of(Option::none);
     } else {
-      return decide(cmd).flatMap(this::publish)
-                        .peek(this::evolve)
-                        .flatMap(this::saga)
-                        .map(Option::some)
-                        .recover(NoSuchElementException.class, Option.none());
+      return decide(cmd).peek(this::evolve).flatMap(this::saga).flatMap(this::append).map(Option::some);
     }
   }
 
@@ -77,14 +69,14 @@ public class Aggregate<S extends State, C extends Command, E extends Event> {
     }
     state.set(newState);
     eventSeqId.getAndIncrement();
-    processedCommands.add(e.meta().commandId().id());
+    processedCommands.add(e.meta().commandId());
   }
 
   Try<E> saga(E e) {
     return domain.saga().apply(e).map(this::publish).map(tr -> tr.map(c -> e)).getOrElse(Try.success(e));
   }
 
-  Try<E> publish(E event) {
+  Try<E> append(E event) {
     return eventRepo.append(event.meta().stateId().id().value(), eventSeqId.get(), event);
   }
 
