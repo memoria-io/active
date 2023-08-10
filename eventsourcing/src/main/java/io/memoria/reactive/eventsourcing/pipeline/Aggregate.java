@@ -1,5 +1,6 @@
 package io.memoria.reactive.eventsourcing.pipeline;
 
+import io.memoria.atom.core.caching.KCache;
 import io.memoria.atom.eventsourcing.Command;
 import io.memoria.atom.eventsourcing.CommandId;
 import io.memoria.atom.eventsourcing.Domain;
@@ -11,8 +12,6 @@ import io.vavr.collection.Stream;
 import io.vavr.control.Option;
 import io.vavr.control.Try;
 
-import java.util.HashSet;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -23,19 +22,27 @@ public class Aggregate<S extends State, C extends Command, E extends Event> {
   private final EventRepo<E> eventRepo;
   private final CommandRoute commandRoute;
   private final CommandStream<C> commandStream;
-  private final Set<CommandId> processedCommands;
+  private final KCache<CommandId> processedCommands;
 
   public Aggregate(Domain<S, C, E> domain,
                    EventRepo<E> eventRepo,
                    CommandRoute commandRoute,
                    CommandStream<C> commandStream) {
+    this(domain, eventRepo, commandRoute, commandStream, 1000_000);
+  }
+
+  public Aggregate(Domain<S, C, E> domain,
+                   EventRepo<E> eventRepo,
+                   CommandRoute commandRoute,
+                   CommandStream<C> commandStream,
+                   int capacity) {
     this.domain = domain;
     this.state = new AtomicReference<>();
     this.eventSeqId = new AtomicInteger();
     this.eventRepo = eventRepo;
     this.commandRoute = commandRoute;
     this.commandStream = commandStream;
-    this.processedCommands = new HashSet<>();
+    this.processedCommands = new KCache<>(capacity);
   }
 
   public Stream<Try<E>> init(String aggId) {

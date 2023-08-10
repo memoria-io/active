@@ -1,6 +1,8 @@
 package io.memoria.reactive.eventsourcing.stream;
 
 import io.memoria.active.core.stream.BlockingStream;
+import io.memoria.active.core.stream.Msg;
+import io.memoria.active.core.stream.MsgResult;
 import io.memoria.atom.core.text.TextTransformer;
 import io.memoria.atom.eventsourcing.Command;
 import io.vavr.collection.Stream;
@@ -21,16 +23,16 @@ public class CommandStream<C extends Command> {
     return toMsg(cmd).flatMap(msg -> stream.append(topic, partition, msg)).map(str -> cmd);
   }
 
-  public Stream<Try<C>> stream(String topic, int partition) {
+  public Stream<Try<CommandResult>> stream(String topic, int partition) {
     return stream.stream(topic, partition).map(tr -> tr.flatMap(this::toCmd));
   }
 
-  Try<C> toCmd(String msg) {
-    return transformer.deserialize(msg, cClass);
+  Try<CommandResult> toCmd(MsgResult result) {
+    return transformer.deserialize(result.msg().value(), cClass).map(cmd -> new CommandResult(cmd, result.ack()));
   }
 
-  Try<String> toMsg(C cmd) {
-    return transformer.serialize(cmd);
+  Try<Msg> toMsg(C cmd) {
+    return transformer.serialize(cmd).map(value -> new Msg(cmd.meta().commandId().value(), value));
   }
 }
 
