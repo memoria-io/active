@@ -1,5 +1,8 @@
 package io.memoria.active.nats;
 
+import io.memoria.active.core.stream.Ack;
+import io.memoria.active.core.stream.Msg;
+import io.memoria.active.core.stream.MsgResult;
 import io.nats.client.Connection;
 import io.nats.client.ErrorListener;
 import io.nats.client.JetStream;
@@ -15,11 +18,14 @@ import io.nats.client.api.DeliverPolicy;
 import io.nats.client.api.ReplayPolicy;
 import io.nats.client.api.StreamConfiguration;
 import io.nats.client.api.StreamInfo;
+import io.nats.client.impl.Headers;
+import io.nats.client.impl.NatsMessage;
 import io.vavr.collection.List;
 import io.vavr.control.Option;
 import io.vavr.control.Try;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 
 /**
@@ -110,5 +116,18 @@ public class Utils {
 
   static String streamName(String topic, int partition) {
     return "%s%s%d".formatted(topic, SPLIT_TOKEN, partition);
+  }
+
+  static NatsMessage natsMessage(String topic, int partition, Msg msg) {
+    var subjectName = subjectName(topic, partition);
+    var headers = new Headers();
+    headers.add(ID_HEADER, msg.key());
+    return NatsMessage.builder().subject(subjectName).headers(headers).data(msg.value()).build();
+  }
+
+  static MsgResult toMsgResult(Message message) {
+    String key = message.getHeaders().getFirst(ID_HEADER);
+    var value = new String(message.getData(), StandardCharsets.UTF_8);
+    return new MsgResult(key, value, Ack.of(message::ack));
   }
 }

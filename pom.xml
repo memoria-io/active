@@ -26,6 +26,7 @@
     <modules>
         <module>core</module>
         <module>eventsourcing</module>
+        <module>testsuite</module>
         <module>kafka</module>
         <module>nats</module>
         <module>etcd</module>
@@ -92,7 +93,11 @@
                 <artifactId>text</artifactId>
                 <version>${atom.version}</version>
             </dependency>
-
+            <dependency>
+                <groupId>io.memoria.atom</groupId>
+                <artifactId>testsuite</artifactId>
+                <version>${atom.version}</version>
+            </dependency>
             <!-- ===============================================================   -->
             <!-- Adapters Dependencies                                                 -->
             <!-- ===============================================================   -->

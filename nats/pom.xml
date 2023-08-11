@@ -15,11 +15,17 @@
     <name>${project.groupId}.${project.artifactId}</name>
     <description>ETCD Module</description>
     <dependencies>
+        <!--======================================================================================== -->
+        <!-- Module Dependencies -->
+        <!--======================================================================================== -->
         <dependency>
             <groupId>io.memoria.active</groupId>
             <artifactId>core</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
+        <!--======================================================================================== -->
+        <!-- Nats Dependencies -->
+        <!--======================================================================================== -->
         <dependency>
             <groupId>io.nats</groupId>
             <artifactId>jnats</artifactId>

@@ -10,7 +10,7 @@
     </parent>
     <groupId>io.memoria.active</groupId>
     <artifactId>eventsourcing</artifactId>
-    <version>20.27.0</version>
+    <version>20.25.0</version>
     <packaging>jar</packaging>
     <name>${project.groupId}.${project.artifactId}</name>
     <description>Event sourcing Module</description>

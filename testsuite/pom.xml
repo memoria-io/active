@@ -9,11 +9,11 @@
         <version>20.25.0</version>
     </parent>
     <groupId>io.memoria.active</groupId>
-    <artifactId>kafka</artifactId>
+    <artifactId>testsuite</artifactId>
     <version>20.25.0</version>
     <packaging>jar</packaging>
     <name>${project.groupId}.${project.artifactId}</name>
-    <description>ETCD Module</description>
+    <description>Event sourcing Module</description>
     <dependencies>
         <!--======================================================================================== -->
         <!-- Module Dependencies -->
@@ -23,12 +23,28 @@
             <artifactId>core</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
+        <dependency>
+            <groupId>io.memoria.active</groupId>
+            <artifactId>eventsourcing</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.memoria.active</groupId>
+            <artifactId>kafka</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.memoria.active</groupId>
+            <artifactId>nats</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+
         <!--======================================================================================== -->
-        <!-- Kafka Dependencies -->
+        <!-- Atom Dependencies -->
         <!--======================================================================================== -->
         <dependency>
-            <groupId>org.apache.kafka</groupId>
-            <artifactId>kafka-clients</artifactId>
+            <groupId>io.memoria.atom</groupId>
+            <artifactId>testsuite</artifactId>
         </dependency>
     </dependencies>
 </project>
