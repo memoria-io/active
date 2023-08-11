@@ -14,8 +14,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
-import static io.memoria.active.nats.Utils.createSubscription;
-import static io.memoria.active.nats.Utils.fetchMessages;
+import static io.memoria.active.nats.NatsUtils.createSubscription;
+import static io.memoria.active.nats.NatsUtils.fetchMessages;
 
 public class NatsMsgStream implements BlockingStream {
   private static final Logger log = LoggerFactory.getLogger(NatsMsgStream.class.getName());
@@ -25,14 +25,14 @@ public class NatsMsgStream implements BlockingStream {
 
   public NatsMsgStream(NatsConfig natsConfig) throws IOException, InterruptedException {
     this.natsConfig = natsConfig;
-    this.connection = Utils.createConnection(this.natsConfig);
+    this.connection = NatsUtils.createConnection(this.natsConfig);
     this.jetStream = connection.jetStream();
   }
 
   @Override
   public Try<Msg> append(String topic, int partition, Msg msg) {
     var opts = PublishOptions.builder().clearExpected().messageId(msg.key()).build();
-    var natsMessage = Utils.natsMessage(topic, partition, msg);
+    var natsMessage = NatsUtils.natsMessage(topic, partition, msg);
     return Try.of(() -> jetStream.publishAsync(natsMessage, opts).get()).map(ack -> msg);
   }
 
@@ -44,7 +44,7 @@ public class NatsMsgStream implements BlockingStream {
                                                     natsConfig.fetchBatchSize(),
                                                     natsConfig.fetchMaxWait()))
                    .flatMap(Stream::ofAll)
-                   .map(Utils::toMsgResult)
+                   .map(NatsUtils::toMsgResult)
                    .map(Try::success);
     } else {
       return Stream.of(Try.failure(subTry.getCause()));

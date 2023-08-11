@@ -89,6 +89,6 @@ public class Aggregate<S extends State, C extends Command, E extends Event> {
 
   Try<C> publish(C cmd) {
     var partition = cmd.meta().partition(commandRoute.totalPartitions());
-    return commandStream.append(commandRoute.topic(), partition, cmd);
+    return commandStream.append(commandRoute.name(), partition, cmd);
   }
 }
