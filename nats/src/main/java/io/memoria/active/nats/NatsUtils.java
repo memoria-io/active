@@ -1,6 +1,5 @@
 package io.memoria.active.nats;
 
-import io.memoria.active.core.stream.Ack;
 import io.memoria.active.core.stream.Msg;
 import io.memoria.active.core.stream.MsgResult;
 import io.nats.client.Connection;
@@ -128,6 +127,6 @@ public class NatsUtils {
   static MsgResult toMsgResult(Message message) {
     String key = message.getHeaders().getFirst(ID_HEADER);
     var value = new String(message.getData(), StandardCharsets.UTF_8);
-    return new MsgResult(key, value, Ack.of(message::ack));
+    return new MsgResult(key, value, message::ack);
   }
 }

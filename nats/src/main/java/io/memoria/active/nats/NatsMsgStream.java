@@ -37,7 +37,7 @@ public class NatsMsgStream implements BlockingStream {
   }
 
   @Override
-  public Stream<Try<MsgResult>> stream(String topic, int partition) {
+  public Stream<Try<MsgResult>> stream(String topic, int partition, boolean fromStart) {
     var subTry = createSubscription(this.jetStream, DeliverPolicy.All, topic, partition);
     if (subTry.isSuccess()) {
       return Stream.continually(() -> fetchMessages(subTry.get(),

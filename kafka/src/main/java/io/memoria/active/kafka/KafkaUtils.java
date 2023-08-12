@@ -1,10 +1,15 @@
 package io.memoria.active.kafka;
 
+import io.memoria.active.core.stream.Msg;
+import io.memoria.active.core.stream.MsgResult;
+import io.vavr.Function1;
 import io.vavr.collection.List;
 import io.vavr.collection.Map;
+import io.vavr.collection.Stream;
 import io.vavr.control.Option;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.TopicPartition;
 
 import java.time.Duration;
@@ -20,6 +25,12 @@ public class KafkaUtils {
       consumer.seekToEnd(tpCol);
       return consumer.position(tp);
     }
+  }
+
+  public static Stream<ConsumerRecord<String, String>> consume(KafkaConsumer<String, String> consumer,
+                                                               TopicPartition tp,
+                                                               Duration timeout) {
+    return Stream.continually(() -> Stream.ofAll(consumer.poll(timeout).records(tp))).flatMap(Function1.identity());
   }
 
   public static Option<ConsumerRecord<String, String>> lastKey(String topic,
@@ -44,5 +55,17 @@ public class KafkaUtils {
         return Option.none();
       }
     }
+  }
+
+  public static ProducerRecord<String, String> toRecord(String topic, int partition, Msg msg) {
+    return new ProducerRecord<>(topic, partition, msg.key(), msg.value());
+  }
+
+  public static Msg toMsg(ConsumerRecord<String, String> consumerRecord) {
+    return new Msg(consumerRecord.key(), consumerRecord.value());
+  }
+
+  public static MsgResult toMsgResult(Msg msg, Runnable ack) {
+    return new MsgResult(msg, ack);
   }
 }

@@ -27,10 +27,12 @@ public class HealthController implements HttpService {
   private void health(ServerRequest req, ServerResponse res) {
     var msgTry = checkMessage.get();
     if (msgTry.isSuccess()) {
-      log.info("Health check succeeded: %s".formatted(msgTry.get()));
+      String msg = "Health check succeeded: %s".formatted(msgTry.get());
+      log.info(msg);
       res.status(Status.OK_200).send();
     } else {
-      log.error("Health check failed: %s".formatted(msgTry.getCause().getMessage()));
+      String msg = "Health check failed: %s".formatted(msgTry.getCause().getMessage());
+      log.error(msg);
       log.debug("Health check failed:", msgTry.getCause());
       res.status(Status.INTERNAL_SERVER_ERROR_500).send();
     }

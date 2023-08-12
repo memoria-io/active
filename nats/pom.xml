@@ -30,6 +30,13 @@
             <groupId>io.nats</groupId>
             <artifactId>jnats</artifactId>
         </dependency>
+        <!--======================================================================================== -->
+        <!-- Kafka Dependencies -->
+        <!--======================================================================================== -->
+        <dependency>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>kafka-clients</artifactId>
+        </dependency>
     </dependencies>
 </project>
 

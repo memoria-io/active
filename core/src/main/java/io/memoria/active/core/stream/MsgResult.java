@@ -1,7 +1,25 @@
 package io.memoria.active.core.stream;
 
-public record MsgResult(Msg msg, Ack ack) {
-  public MsgResult(String key, String value, Ack ack) {
-    this(new Msg(key, value), ack);
+public final class MsgResult {
+  private final Msg msg;
+  private final Runnable acknowledge;
+
+  public MsgResult(Msg msg, Runnable acknowledge) {
+    this.msg = msg;
+    this.acknowledge = acknowledge;
+  }
+
+  public MsgResult(String key, String value, Runnable acknowledge) {
+    this.msg = new Msg(key, value);
+    this.acknowledge = acknowledge;
+  }
+
+  public void ack() {
+    System.out.println("ack was called");
+    acknowledge.run();
+  }
+
+  public Msg msg() {
+    return msg;
   }
 }
