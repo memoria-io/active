@@ -80,7 +80,7 @@ Format Example: `JDK_Version.major.mino`
 
 * [ ] Blocking Event sourcing
 * [ ] Blocking Event repo implementation
-* [ ] Blocking kafka and nats clients
+* [ ] Blocking kafka and nats adapters
 * [ ] Project helidon/nima adoption
 * [ ] JVM Profiling
 * [ ] Performance testing

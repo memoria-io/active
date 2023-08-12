@@ -4,6 +4,7 @@ import io.memoria.active.core.repo.seq.SeqRow;
 import io.memoria.active.core.repo.seq.SeqRowRepo;
 import io.memoria.atom.core.text.TextTransformer;
 import io.memoria.atom.eventsourcing.Event;
+import io.memoria.atom.eventsourcing.StateId;
 import io.vavr.collection.Stream;
 import io.vavr.control.Try;
 
@@ -18,16 +19,16 @@ public class EventRepo<E extends Event> {
     this.transformer = transformer;
   }
 
-  public Try<E> append(String aggId, int seqId, E e) {
-    return repo.size(aggId).flatMap(size -> toRow(seqId, e)).flatMap(repo::append).map(row -> e);
+  public Try<E> append(StateId aggId, int seqId, E e) {
+    return repo.size(aggId.value()).flatMap(size -> toRow(seqId, e)).flatMap(repo::append).map(row -> e);
   }
 
-  public Stream<Try<E>> fetch(String aggId) {
-    return repo.stream(aggId).map(tr -> tr.flatMap(this::toEvent));
+  public Stream<Try<E>> fetch(StateId aggId) {
+    return repo.stream(aggId.value()).map(tr -> tr.flatMap(this::toEvent));
   }
 
-  public Try<Integer> size(String aggId) {
-    return repo.size(aggId);
+  public Try<Integer> size(StateId aggId) {
+    return repo.size(aggId.value());
   }
 
   private Try<E> toEvent(SeqRow row) {
@@ -35,7 +36,8 @@ public class EventRepo<E extends Event> {
   }
 
   Try<SeqRow> toRow(int seqId, E event) {
-    return transformer.serialize(event).map(eventStr -> new SeqRow(event.meta().stateId().id().value(), seqId, eventStr));
+    return transformer.serialize(event)
+                      .map(eventStr -> new SeqRow(event.meta().stateId().id().value(), seqId, eventStr));
   }
 }
 

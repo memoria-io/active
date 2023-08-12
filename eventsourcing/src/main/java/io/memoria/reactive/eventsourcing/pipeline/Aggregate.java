@@ -4,52 +4,87 @@ import io.memoria.atom.core.caching.KCache;
 import io.memoria.atom.eventsourcing.Command;
 import io.memoria.atom.eventsourcing.CommandId;
 import io.memoria.atom.eventsourcing.Domain;
+import io.memoria.atom.eventsourcing.ESException.MismatchingStateId;
 import io.memoria.atom.eventsourcing.Event;
 import io.memoria.atom.eventsourcing.State;
+import io.memoria.atom.eventsourcing.StateId;
 import io.memoria.reactive.eventsourcing.repo.EventRepo;
 import io.memoria.reactive.eventsourcing.stream.CommandStream;
 import io.vavr.collection.Stream;
 import io.vavr.control.Option;
 import io.vavr.control.Try;
 
+import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 
 public class Aggregate<S extends State, C extends Command, E extends Event> {
+  public final StateId stateId;
   private final Domain<S, C, E> domain;
   private final AtomicReference<S> state;
   private final AtomicInteger eventSeqId;
   private final EventRepo<E> eventRepo;
-  private final CommandRoute commandRoute;
+  private final CommandTopic commandTopic;
   private final CommandStream<C> commandStream;
   private final KCache<CommandId> processedCommands;
+  private final BlockingDeque<C> commands;
+  private final Thread thread;
 
-  public Aggregate(Domain<S, C, E> domain,
+  public Aggregate(StateId stateId,
+                   Domain<S, C, E> domain,
                    EventRepo<E> eventRepo,
-                   CommandRoute commandRoute,
-                   CommandStream<C> commandStream) {
-    this(domain, eventRepo, commandRoute, commandStream, 1000_000);
+                   CommandTopic commandTopic,
+                   CommandStream<C> commandStream,
+                   Consumer<Try<E>> eventConsumer) {
+    this(stateId, domain, eventRepo, commandTopic, commandStream, eventConsumer, 1000_000);
   }
 
-  public Aggregate(Domain<S, C, E> domain,
+  public Aggregate(StateId stateId,
+                   Domain<S, C, E> domain,
                    EventRepo<E> eventRepo,
-                   CommandRoute commandRoute,
+                   CommandTopic commandTopic,
                    CommandStream<C> commandStream,
+                   Consumer<Try<E>> eventConsumer,
                    int capacity) {
+    this.stateId = stateId;
     this.domain = domain;
     this.state = new AtomicReference<>();
     this.eventSeqId = new AtomicInteger();
     this.eventRepo = eventRepo;
-    this.commandRoute = commandRoute;
+    this.commandTopic = commandTopic;
     this.commandStream = commandStream;
     this.processedCommands = new KCache<>(capacity);
+    this.commands = new LinkedBlockingDeque<>();
+    this.thread = Thread.ofVirtual().unstarted(() -> Stream.concat(initialize(), handle()).forEach(eventConsumer));
   }
 
-  public Stream<Try<E>> init(String aggId) {
-    return eventRepo.fetch(aggId).peek(tr -> tr.peek(this::evolve));
+  public void start() {
+    this.thread.start();
   }
 
-  public Try<Option<E>> handle(C cmd) {
+  public void append(C cmd) {
+    if (!this.thread.isAlive()) {
+      throw new IllegalStateException("Thread: %s is no longer alive".formatted(thread.getName()));
+    }
+    if (cmd.meta().stateId().equals(this.stateId)) {
+      commands.add(cmd);
+    } else {
+      throw MismatchingStateId.of(this.stateId, cmd.meta().stateId());
+    }
+  }
+
+  Stream<Try<E>> initialize() {
+    return eventRepo.fetch(stateId).peek(tr -> tr.peek(this::evolve));
+  }
+
+  Stream<Try<E>> handle() {
+    return Stream.continually(() -> Try.of(commands::take))
+                 .map(tr -> tr.flatMap(this::handle).filter(Option::isDefined).map(Option::get));
+  }
+
+  Try<Option<E>> handle(C cmd) {
     if (processedCommands.contains(cmd.meta().commandId())) {
       return Try.of(Option::none);
     } else {
@@ -84,11 +119,11 @@ public class Aggregate<S extends State, C extends Command, E extends Event> {
   }
 
   Try<E> append(E event) {
-    return eventRepo.append(event.meta().stateId().id().value(), eventSeqId.get(), event);
+    return eventRepo.append(event.meta().stateId(), eventSeqId.get(), event);
   }
 
   Try<C> publish(C cmd) {
-    var partition = cmd.meta().partition(commandRoute.totalPartitions());
-    return commandStream.append(commandRoute.name(), partition, cmd);
+    var partition = cmd.meta().partition(commandTopic.totalPartitions());
+    return commandStream.append(commandTopic.name(), partition, cmd);
   }
 }
