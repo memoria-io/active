@@ -10,11 +10,14 @@ import org.apache.kafka.common.serialization.StringSerializer;
 class Infra {
   private Infra() {}
 
+  /**
+   * Max poll records = 1, is for atomic ack
+   */
   public static Map<String, Object> consumerConfigs() {
     return HashMap.of(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG,
                       "localhost:9092",
                       ConsumerConfig.MAX_POLL_RECORDS_CONFIG,
-                      10,
+                      1,
                       ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG,
                       "false",
                       ConsumerConfig.AUTO_OFFSET_RESET_CONFIG,

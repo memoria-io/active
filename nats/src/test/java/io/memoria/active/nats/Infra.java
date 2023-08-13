@@ -6,7 +6,6 @@ import java.time.Duration;
 
 public class Infra {
   public static final String NATS_URL = "nats://localhost:4222";
-  //  public static final BankingData DATA = BankingData.ofSerial();
   public static final NatsConfig NATS_CONFIG = NatsConfig.appendOnly(NATS_URL,
                                                                      StorageType.File,
                                                                      1,

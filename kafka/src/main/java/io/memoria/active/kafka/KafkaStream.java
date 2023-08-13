@@ -38,7 +38,7 @@ public class KafkaStream implements BlockingStream {
   }
 
   @Override
-  public Try<Msg> append(String topic, int partition, Msg msg) {
+  public Try<Msg> publish(String topic, int partition, Msg msg) {
     return Try.of(() -> send(topic, partition, msg)).map(meta -> msg);
   }
 

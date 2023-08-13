@@ -20,7 +20,7 @@ public class CommandStream<C extends Command> {
   }
 
   public Try<C> append(String topic, int partition, C cmd) {
-    return toMsg(cmd).flatMap(msg -> stream.append(topic, partition, msg)).map(str -> cmd);
+    return toMsg(cmd).flatMap(msg -> stream.publish(topic, partition, msg)).map(str -> cmd);
   }
 
   public Stream<Try<CommandResult>> stream(String topic, int partition) {

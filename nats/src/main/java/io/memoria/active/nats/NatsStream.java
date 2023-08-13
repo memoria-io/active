@@ -13,27 +13,32 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.time.Duration;
+import java.util.concurrent.TimeUnit;
 
 import static io.memoria.active.nats.NatsUtils.createSubscription;
 import static io.memoria.active.nats.NatsUtils.fetchMessages;
 
-public class NatsMsgStream implements BlockingStream {
-  private static final Logger log = LoggerFactory.getLogger(NatsMsgStream.class.getName());
+public class NatsStream implements BlockingStream {
+  private static final Logger log = LoggerFactory.getLogger(NatsStream.class.getName());
   private final NatsConfig natsConfig;
   private final Connection connection;
   private final JetStream jetStream;
+  private final Duration pollTimeout;
 
-  public NatsMsgStream(NatsConfig natsConfig) throws IOException, InterruptedException {
+  public NatsStream(NatsConfig natsConfig, Duration pollTimeout) throws IOException, InterruptedException {
     this.natsConfig = natsConfig;
+    this.pollTimeout = pollTimeout;
     this.connection = NatsUtils.createConnection(this.natsConfig);
     this.jetStream = connection.jetStream();
   }
 
   @Override
-  public Try<Msg> append(String topic, int partition, Msg msg) {
+  public Try<Msg> publish(String topic, int partition, Msg msg) {
     var opts = PublishOptions.builder().clearExpected().messageId(msg.key()).build();
     var natsMessage = NatsUtils.natsMessage(topic, partition, msg);
-    return Try.of(() -> jetStream.publishAsync(natsMessage, opts).get()).map(ack -> msg);
+    return Try.of(() -> jetStream.publishAsync(natsMessage, opts).get(pollTimeout.toMillis(), TimeUnit.MILLISECONDS))
+              .map(ack -> msg);
   }
 
   @Override

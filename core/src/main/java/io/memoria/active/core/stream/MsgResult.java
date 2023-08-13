@@ -15,7 +15,6 @@ public final class MsgResult {
   }
 
   public void ack() {
-    System.out.println("ack was called");
     acknowledge.run();
   }
 
