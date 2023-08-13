@@ -37,17 +37,8 @@ public class Aggregate<S extends State, C extends Command, E extends Event> {
                    EventRepo<E> eventRepo,
                    CommandTopic commandTopic,
                    CommandStream<C> commandStream,
+                   KCache<CommandId> commandsCache,
                    Consumer<Try<E>> eventConsumer) {
-    this(stateId, domain, eventRepo, commandTopic, commandStream, eventConsumer, 1000_000);
-  }
-
-  public Aggregate(StateId stateId,
-                   Domain<S, C, E> domain,
-                   EventRepo<E> eventRepo,
-                   CommandTopic commandTopic,
-                   CommandStream<C> commandStream,
-                   Consumer<Try<E>> eventConsumer,
-                   int capacity) {
     this.stateId = stateId;
     this.domain = domain;
     this.state = new AtomicReference<>();
@@ -55,7 +46,7 @@ public class Aggregate<S extends State, C extends Command, E extends Event> {
     this.eventRepo = eventRepo;
     this.commandTopic = commandTopic;
     this.commandStream = commandStream;
-    this.processedCommands = new KCache<>(capacity);
+    this.processedCommands = commandsCache;
     this.commands = new LinkedBlockingDeque<>();
     this.thread = Thread.ofVirtual().unstarted(() -> Stream.concat(initialize(), handle()).forEach(eventConsumer));
   }

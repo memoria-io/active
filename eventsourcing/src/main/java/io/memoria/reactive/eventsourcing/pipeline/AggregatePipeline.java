@@ -1,6 +1,8 @@
 package io.memoria.reactive.eventsourcing.pipeline;
 
+import io.memoria.atom.core.caching.KCache;
 import io.memoria.atom.eventsourcing.Command;
+import io.memoria.atom.eventsourcing.CommandId;
 import io.memoria.atom.eventsourcing.Domain;
 import io.memoria.atom.eventsourcing.Event;
 import io.memoria.atom.eventsourcing.State;
@@ -19,27 +21,20 @@ public class AggregatePipeline<S extends State, C extends Command, E extends Eve
   private final EventRepo<E> eventRepo;
   private final CommandTopic commandTopic;
   private final CommandStream<C> commandStream;
-  private final int aggCacheCapacity;
+  private final KCache<CommandId> cache;
   private final Consumer<Try<E>> eventConsumer;
 
   public AggregatePipeline(Domain<S, C, E> domain,
                            EventRepo<E> eventRepo,
                            CommandTopic commandTopic,
-                           CommandStream<C> commandStream) {
-    this(domain, eventRepo, commandTopic, commandStream, AggregatePipeline::defaultConsumer, 1000_000);
-  }
-
-  public AggregatePipeline(Domain<S, C, E> domain,
-                           EventRepo<E> eventRepo,
-                           CommandTopic commandTopic,
                            CommandStream<C> commandStream,
-                           Consumer<Try<E>> eventConsumer,
-                           int aggCacheCapacity) {
+                           KCache<CommandId> commandIdCache,
+                           Consumer<Try<E>> eventConsumer) {
     this.domain = domain;
     this.eventRepo = eventRepo;
     this.commandTopic = commandTopic;
     this.commandStream = commandStream;
-    this.aggCacheCapacity = aggCacheCapacity;
+    this.cache = commandIdCache;
     this.eventConsumer = eventConsumer;
     this.aggMap = new ConcurrentHashMap<>();
   }
@@ -50,7 +45,7 @@ public class AggregatePipeline<S extends State, C extends Command, E extends Eve
   }
 
   private Aggregate<S, C, E> startAggregate(StateId stateId) {
-    var agg = new Aggregate<>(stateId, domain, eventRepo, commandTopic, commandStream, eventConsumer, aggCacheCapacity);
+    var agg = new Aggregate<>(stateId, domain, eventRepo, commandTopic, commandStream, cache, eventConsumer);
     agg.start();
     return agg;
   }
