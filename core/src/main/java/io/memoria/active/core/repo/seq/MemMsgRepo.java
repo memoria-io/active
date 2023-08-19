@@ -23,8 +23,9 @@ class MemMsgRepo implements SeqRowRepo {
   }
 
   @Override
-  public Stream<Try<SeqRow>> stream(String aggId) {
-    return Stream.ofAll(getAgg(aggId).getOrElse(new ArrayList<>())).map(Try::success);
+  public Try<Stream<SeqRow>> stream(String aggId) {
+    var stream = Stream.ofAll(getAgg(aggId).getOrElse(new ArrayList<>()));
+    return Try.success(stream);
   }
 
   @Override

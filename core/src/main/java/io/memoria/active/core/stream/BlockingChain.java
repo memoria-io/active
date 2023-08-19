@@ -6,7 +6,7 @@ import io.vavr.control.Try;
 public interface BlockingChain<T> {
   Try<T> append(T t);
 
-  Stream<Try<T>> stream();
+  Try<Stream<T>> stream();
 
   static <T> BlockingChain<T> inMemory() {
     return new MemBlockingChain<>();

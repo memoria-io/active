@@ -67,7 +67,7 @@ public class Aggregate<S extends State, C extends Command, E extends Event> {
   }
 
   Stream<Try<E>> initialize() {
-    return eventRepo.fetch(stateId).peek(tr -> tr.peek(this::evolve));
+    return eventRepo.fetch(stateId).get().peek(this::evolve).map(Try::success);
   }
 
   Stream<Try<E>> handle() {

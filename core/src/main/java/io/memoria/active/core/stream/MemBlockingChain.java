@@ -43,12 +43,12 @@ class MemBlockingChain<T> implements BlockingChain<T> {
   }
 
   @Override
-  public Stream<Try<T>> stream() {
+  public Try<Stream<T>> stream() {
     var firstTry = Try.of(() -> {
       latch.await();
       return first.get();
     });
-    return Stream.iterate(firstTry, t -> t.map(node -> node.tail().get())).map(tr -> tr.map(Node::head));
+    return firstTry.map(f -> Stream.iterate(f, t -> t.tail().get())).map(tr -> tr.map(Node::head));
   }
 
   static class Node<T> {

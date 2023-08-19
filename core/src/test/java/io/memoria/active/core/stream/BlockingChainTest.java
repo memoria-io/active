@@ -23,8 +23,8 @@ class BlockingChainTest {
     });
 
     AtomicInteger idx = new AtomicInteger(0);
-    stream.stream().take(1).forEach(i -> {
-      assertThat(i.get()).isEqualTo(idx.getAndIncrement());
+    stream.stream().get().take(1).forEach(i -> {
+      assertThat(i).isEqualTo(idx.getAndIncrement());
     });
   }
 
@@ -38,8 +38,8 @@ class BlockingChainTest {
     });
 
     AtomicInteger idx = new AtomicInteger(0);
-    stream.stream().take(count).forEach(i -> {
-      assertThat(i.get()).isEqualTo(idx.getAndIncrement());
+    stream.stream().get().take(count).forEach(i -> {
+      assertThat(i).isEqualTo(idx.getAndIncrement());
     });
   }
 
@@ -55,6 +55,6 @@ class BlockingChainTest {
         throw new RuntimeException(e);
       }
     });
-    Awaitility.await().timeout(Duration.ofMillis(250)).until(() -> stream.stream().take(2).length() == 2);
+    Awaitility.await().timeout(Duration.ofMillis(250)).until(() -> stream.stream().get().take(2).length() == 2);
   }
 }

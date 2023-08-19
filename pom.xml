@@ -25,6 +25,7 @@
 
     <modules>
         <module>core</module>
+        <module>cassandra</module>
         <module>eventsourcing</module>
         <module>testsuite</module>
         <module>kafka</module>
@@ -35,6 +36,7 @@
 
     <properties>
         <atom.version>20.23.0</atom.version>
+        <cassandra.version>4.15.0</cassandra.version>
         <helidon.version>4.0.0-ALPHA6</helidon.version>
         <jsonwebtoken.version>0.11.5</jsonwebtoken.version>
         <sonar.coverage.exclusions>
@@ -121,6 +123,16 @@
                 <groupId>io.etcd</groupId>
                 <artifactId>jetcd-core</artifactId>
                 <version>0.7.5</version>
+            </dependency>
+            <dependency>
+                <groupId>com.datastax.oss</groupId>
+                <artifactId>java-driver-core</artifactId>
+                <version>${cassandra.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.datastax.oss</groupId>
+                <artifactId>java-driver-query-builder</artifactId>
+                <version>${cassandra.version}</version>
             </dependency>
             <!--======================================================================================== -->
             <!-- Netty Dependencies -->

@@ -43,7 +43,22 @@ public class KafkaStream implements BlockingStream {
   }
 
   @Override
-  public Stream<Try<MsgResult>> stream(String topic, int partition, boolean fromStart) {
+  public Try<Stream<MsgResult>> stream(String topic, int partition, boolean fromStart) {
+    return Try.of(() -> consume(topic, partition, fromStart));
+  }
+
+  @Override
+  public void close() {
+    this.kafkaProducer.close();
+    this.kafkaConsumers.forEach(KafkaConsumer::close);
+  }
+
+  private RecordMetadata send(String topic, int partition, Msg msg)
+          throws InterruptedException, ExecutionException, TimeoutException {
+    return this.kafkaProducer.send(toRecord(topic, partition, msg)).get(timeout.toMillis(), TimeUnit.MILLISECONDS);
+  }
+
+  private Stream<MsgResult> consume(String topic, int partition, boolean fromStart) {
     var consumer = new KafkaConsumer<String, String>(consumerConfig.toJavaMap());
     this.kafkaConsumers.add(consumer);
     var tp = new TopicPartition(topic, partition);
@@ -56,18 +71,6 @@ public class KafkaStream implements BlockingStream {
     }
     return KafkaUtils.consume(consumer, tp, timeout)
                      .map(KafkaUtils::toMsg)
-                     .map(msg -> KafkaUtils.toMsgResult(msg, consumer::commitSync))
-                     .map(Try::success);
-  }
-
-  @Override
-  public void close() {
-    this.kafkaProducer.close();
-    this.kafkaConsumers.forEach(KafkaConsumer::close);
-  }
-
-  private RecordMetadata send(String topic, int partition, Msg msg)
-          throws InterruptedException, ExecutionException, TimeoutException {
-    return this.kafkaProducer.send(toRecord(topic, partition, msg)).get(timeout.toMillis(), TimeUnit.MILLISECONDS);
+                     .map(msg -> KafkaUtils.toMsgResult(msg, consumer::commitSync));
   }
 }

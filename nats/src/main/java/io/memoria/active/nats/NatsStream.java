@@ -5,6 +5,7 @@ import io.memoria.active.core.stream.Msg;
 import io.memoria.active.core.stream.MsgResult;
 import io.nats.client.Connection;
 import io.nats.client.JetStream;
+import io.nats.client.JetStreamSubscription;
 import io.nats.client.PublishOptions;
 import io.nats.client.api.DeliverPolicy;
 import io.vavr.collection.Stream;
@@ -42,23 +43,20 @@ public class NatsStream implements BlockingStream {
   }
 
   @Override
-  public Stream<Try<MsgResult>> stream(String topic, int partition, boolean fromStart) {
-    var subTry = createSubscription(this.jetStream, DeliverPolicy.All, topic, partition);
-    if (subTry.isSuccess()) {
-      return Stream.continually(() -> fetchMessages(subTry.get(),
-                                                    natsConfig.fetchBatchSize(),
-                                                    natsConfig.fetchMaxWait()))
-                   .flatMap(Stream::ofAll)
-                   .map(NatsUtils::toMsgResult)
-                   .map(Try::success);
-    } else {
-      return Stream.of(Try.failure(subTry.getCause()));
-    }
+  public Try<Stream<MsgResult>> stream(String topic, int partition, boolean fromStart) {
+    var subscriptionTry = createSubscription(this.jetStream, DeliverPolicy.All, topic, partition);
+    return subscriptionTry.map(this::messageStream);
   }
 
   @Override
   public void close() throws Exception {
     log.info("Closing connection:{}", connection.getServerInfo());
     connection.close();
+  }
+
+  private Stream<MsgResult> messageStream(JetStreamSubscription sub) {
+    return Stream.continually(() -> fetchMessages(sub, natsConfig.fetchBatchSize(), natsConfig.fetchMaxWait()))
+                 .flatMap(Stream::ofAll)
+                 .map(NatsUtils::toMsgResult);
   }
 }

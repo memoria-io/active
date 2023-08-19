@@ -1,5 +1,13 @@
 version: "3.3"
 services:
+  cassandra:
+    image: bitnami/cassandra:4.0.7
+    ports:
+      - "9042:9042"
+      - "7000:7000"
+    environment:
+      CASSANDRA_AUTHENTICATOR: AllowAllAuthenticator
+      CASSANDRA_AUTHORIZER: AllowAllAuthorizer
   etcd:
     image: bitnami/etcd:3.5.8
     environment:
