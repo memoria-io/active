@@ -4,7 +4,6 @@ import io.memoria.atom.core.caching.KCache;
 import io.memoria.atom.eventsourcing.Command;
 import io.memoria.atom.eventsourcing.CommandId;
 import io.memoria.atom.eventsourcing.Domain;
-import io.memoria.atom.eventsourcing.ESException.MismatchingStateId;
 import io.memoria.atom.eventsourcing.Event;
 import io.memoria.atom.eventsourcing.State;
 import io.memoria.atom.eventsourcing.StateId;
@@ -14,11 +13,9 @@ import io.vavr.collection.Stream;
 import io.vavr.control.Option;
 import io.vavr.control.Try;
 
-import java.util.concurrent.BlockingDeque;
-import java.util.concurrent.LinkedBlockingDeque;
+import java.util.NoSuchElementException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
 
 public class Aggregate<S extends State, C extends Command, E extends Event> {
   public final StateId stateId;
@@ -29,16 +26,13 @@ public class Aggregate<S extends State, C extends Command, E extends Event> {
   private final CommandTopic commandTopic;
   private final CommandStream<C> commandStream;
   private final KCache<CommandId> processedCommands;
-  private final BlockingDeque<C> commands;
-  private final Thread thread;
 
   public Aggregate(StateId stateId,
                    Domain<S, C, E> domain,
                    EventRepo<E> eventRepo,
                    CommandTopic commandTopic,
                    CommandStream<C> commandStream,
-                   KCache<CommandId> commandsCache,
-                   Consumer<Try<E>> eventConsumer) {
+                   KCache<CommandId> commandsCache) {
     this.stateId = stateId;
     this.domain = domain;
     this.state = new AtomicReference<>();
@@ -47,39 +41,18 @@ public class Aggregate<S extends State, C extends Command, E extends Event> {
     this.commandTopic = commandTopic;
     this.commandStream = commandStream;
     this.processedCommands = commandsCache;
-    this.commands = new LinkedBlockingDeque<>();
-    this.thread = Thread.ofVirtual().unstarted(() -> Stream.concat(initialize(), handle()).forEach(eventConsumer));
-  }
-
-  public void start() {
-    this.thread.start();
-  }
-
-  public void append(C cmd) {
-    if (!this.thread.isAlive()) {
-      throw new IllegalStateException("Thread: %s is no longer alive".formatted(thread.getName()));
-    }
-    if (cmd.meta().stateId().equals(this.stateId)) {
-      commands.add(cmd);
-    } else {
-      throw MismatchingStateId.of(this.stateId, cmd.meta().stateId());
-    }
   }
 
   Stream<Try<E>> initialize() {
     return eventRepo.fetch(stateId).get().peek(this::evolve).map(Try::success);
   }
 
-  Stream<Try<E>> handle() {
-    return Stream.continually(() -> Try.of(commands::take))
-                 .map(tr -> tr.flatMap(this::handle).filter(Option::isDefined).map(Option::get));
-  }
-
-  Try<Option<E>> handle(C cmd) {
+  Option<Try<E>> handle(C cmd) {
     if (processedCommands.contains(cmd.meta().commandId())) {
-      return Try.of(Option::none);
+      return Option.none();
     } else {
-      return decide(cmd).peek(this::evolve).flatMap(this::saga).flatMap(this::append).map(Option::some);
+      var result =  decide(cmd).peek(this::evolve).flatMap(this::saga).flatMap(this::append);
+      return Option.some(result);
     }
   }
 

@@ -23,12 +23,17 @@ public class CommandStream<C extends Command> {
     return toMsg(cmd).flatMap(msg -> stream.publish(topic, partition, msg)).map(str -> cmd);
   }
 
-  public Try<Stream<Try<CommandResult>>> stream(String topic, int partition) {
-    return stream.stream(topic, partition).map(tr -> tr.map(this::toCmd));
+  public Stream<Try<CommandResult<C>>> stream(String topic, int partition) {
+    var result = stream.stream(topic, partition).map(tr -> tr.map(this::toCmd));
+    if (result.isSuccess()) {
+      return result.get();
+    } else {
+      return Stream.of(Try.failure(result.getCause()));
+    }
   }
 
-  Try<CommandResult> toCmd(MsgResult result) {
-    return transformer.deserialize(result.msg().value(), cClass).map(cmd -> new CommandResult(cmd, result::ack));
+  Try<CommandResult<C>> toCmd(MsgResult result) {
+    return transformer.deserialize(result.msg().value(), cClass).map(cmd -> new CommandResult<>(cmd, result::ack));
   }
 
   Try<Msg> toMsg(C cmd) {
