@@ -10,17 +10,17 @@ public class CassandraAdmin {
   }
 
   public boolean truncate(String keyspace, String table) {
-    var st = Statements.truncate(keyspace, table);
+    var st = Utils.truncate(keyspace, table);
     return session.execute(st).wasApplied();
   }
 
   public boolean createKeyspace(String keyspace, int replicationFactor) {
-    var st = Statements.createEventsKeyspace(keyspace, replicationFactor);
+    var st = Utils.createEventsKeyspace(keyspace, replicationFactor);
     return session.execute(st).wasApplied();
   }
 
   public boolean createTopicTable(String keyspace, String topic) {
-    var st = Statements.createEventsTable(keyspace, topic);
+    var st = Utils.createEventsTable(keyspace, topic);
     return session.execute(st).wasApplied();
   }
 }

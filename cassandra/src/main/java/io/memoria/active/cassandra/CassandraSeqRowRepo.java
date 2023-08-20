@@ -1,26 +1,42 @@
 package io.memoria.active.cassandra;
 
+import com.datastax.oss.driver.api.core.ConsistencyLevel;
 import com.datastax.oss.driver.api.core.CqlSession;
-import com.datastax.oss.driver.api.core.cql.Row;
 import io.memoria.active.core.repo.seq.SeqRow;
 import io.memoria.active.core.repo.seq.SeqRowRepo;
 import io.vavr.collection.Stream;
 import io.vavr.control.Option;
 import io.vavr.control.Try;
 
-import java.util.Objects;
 import java.util.stream.StreamSupport;
+
+import static com.datastax.oss.driver.api.core.ConsistencyLevel.LOCAL_QUORUM;
 
 /**
  * EventRepo's secondary/driven adapter of cassandra
  */
 public class CassandraSeqRowRepo implements SeqRowRepo {
   private final CqlSession session;
+  private final ConsistencyLevel writeConsistency;
+  private final ConsistencyLevel readConsistency;
   private final String keyspace;
   private final String table;
 
+  /**
+   * Using LOCAL_QUORUM as default for read and write consistency
+   */
   public CassandraSeqRowRepo(CqlSession session, String keyspace, String table) {
+    this(session, LOCAL_QUORUM, LOCAL_QUORUM, keyspace, table);
+  }
+
+  public CassandraSeqRowRepo(CqlSession session,
+                             ConsistencyLevel writeConsistency,
+                             ConsistencyLevel readConsistency,
+                             String keyspace,
+                             String table) {
     this.session = session;
+    this.writeConsistency = writeConsistency;
+    this.readConsistency = readConsistency;
     this.keyspace = keyspace;
     this.table = table;
   }
@@ -38,7 +54,7 @@ public class CassandraSeqRowRepo implements SeqRowRepo {
   @Override
   public Try<Integer> size(String aggId) {
     return Try.of(() -> {
-      var st = Statements.get(keyspace, table, aggId, 0);
+      var st = Utils.size(keyspace, table, aggId);
       return Option.of(session.execute(st).one()).map(r -> r.getInt(0)).getOrElse(0);
     });
   }
@@ -49,31 +65,20 @@ public class CassandraSeqRowRepo implements SeqRowRepo {
   }
 
   Stream<SeqRow> streamRows(String aggId) {
-    var st = Statements.get(keyspace, table, aggId, 0);
+    var st = Utils.get(keyspace, table, aggId, 0).setConsistencyLevel(readConsistency);
     var result = session.execute(st);
     var stream = StreamSupport.stream(result.spliterator(), false);
-    return Stream.ofAll(stream).map(CassandraSeqRowRepo::from).map(this::toESRepoRow);
+    return Stream.ofAll(stream).map(Utils::toCassandraRow).map(Utils::toSeqRow);
   }
 
   SeqRow appendESRow(SeqRow esRow) {
     var row = new CassandraRow(esRow.aggId(), esRow.seqId(), esRow.value());
-    var result = session.execute(Statements.push(keyspace, table, row));
+    var statement = Utils.push(keyspace, table, row).setConsistencyLevel(writeConsistency);
+    var result = session.execute(statement);
     if (result.wasApplied()) {
       return esRow;
     } else {
       throw FailedAppend.of(keyspace, table, esRow);
     }
-  }
-
-  private SeqRow toESRepoRow(CassandraRow r) {
-    return new SeqRow(r.stateId(), r.seqId(), r.payload());
-  }
-
-  public static CassandraRow from(Row row) {
-    var rStateId = Objects.requireNonNull(row.getString(CassandraRow.stateIdCol));
-    var rSeqId = row.getInt(CassandraRow.seqCol);
-    var rCreatedAt = row.getLong(CassandraRow.createdAtCol);
-    var rEvent = Objects.requireNonNull(row.getString(CassandraRow.payloadCol));
-    return new CassandraRow(rStateId, rSeqId, rEvent, rCreatedAt);
   }
 }

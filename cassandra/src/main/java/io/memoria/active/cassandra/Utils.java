@@ -1,15 +1,19 @@
 package io.memoria.active.cassandra;
 
+import com.datastax.oss.driver.api.core.cql.Row;
 import com.datastax.oss.driver.api.core.cql.SimpleStatement;
 import com.datastax.oss.driver.api.core.metadata.schema.ClusteringOrder;
 import com.datastax.oss.driver.api.querybuilder.QueryBuilder;
 import com.datastax.oss.driver.api.querybuilder.SchemaBuilder;
+import io.memoria.active.core.repo.seq.SeqRow;
+
+import java.util.Objects;
 
 import static com.datastax.oss.driver.api.querybuilder.QueryBuilder.literal;
 
-class Statements {
+class Utils {
 
-  private Statements() {}
+  private Utils() {}
 
   public static SimpleStatement push(String keyspace, String table, CassandraRow row) {
     return QueryBuilder.insertInto(keyspace, table)
@@ -77,5 +81,17 @@ class Statements {
                         .withColumn(CassandraRow.payloadCol, CassandraRow.payloadColType)
                         .withColumn(CassandraRow.createdAtCol, CassandraRow.createAtColType)
                         .build();
+  }
+
+  public static CassandraRow toCassandraRow(Row row) {
+    var rStateId = Objects.requireNonNull(row.getString(CassandraRow.stateIdCol));
+    var rSeqId = row.getInt(CassandraRow.seqCol);
+    var rCreatedAt = row.getLong(CassandraRow.createdAtCol);
+    var rEvent = Objects.requireNonNull(row.getString(CassandraRow.payloadCol));
+    return new CassandraRow(rStateId, rSeqId, rEvent, rCreatedAt);
+  }
+
+  public static SeqRow toSeqRow(CassandraRow r) {
+    return new SeqRow(r.stateId(), r.seqId(), r.payload());
   }
 }

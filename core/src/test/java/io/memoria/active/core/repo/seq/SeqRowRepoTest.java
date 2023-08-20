@@ -2,6 +2,7 @@ package io.memoria.active.core.repo.seq;
 
 import io.vavr.collection.List;
 import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
@@ -12,7 +13,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@TestMethodOrder(value = MethodOrderer.class)
+@TestMethodOrder(value = OrderAnnotation.class)
 class SeqRowRepoTest {
   private static final int count = 1000;
   private static final String agg01 = "agg01";
