@@ -54,7 +54,7 @@ public class CassandraSeqRowRepo implements SeqRowRepo {
   @Override
   public Try<Integer> size(String aggId) {
     return Try.of(() -> {
-      var st = Utils.size(keyspace, table, aggId);
+      var st = CassandraUtils.size(keyspace, table, aggId);
       return Option.of(session.execute(st).one()).map(r -> r.getInt(0)).getOrElse(0);
     });
   }
@@ -65,15 +65,15 @@ public class CassandraSeqRowRepo implements SeqRowRepo {
   }
 
   Stream<SeqRow> streamRows(String aggId) {
-    var st = Utils.get(keyspace, table, aggId, 0).setConsistencyLevel(readConsistency);
+    var st = CassandraUtils.get(keyspace, table, aggId, 0).setConsistencyLevel(readConsistency);
     var result = session.execute(st);
     var stream = StreamSupport.stream(result.spliterator(), false);
-    return Stream.ofAll(stream).map(Utils::toCassandraRow).map(Utils::toSeqRow);
+    return Stream.ofAll(stream).map(CassandraUtils::toCassandraRow).map(CassandraUtils::toSeqRow);
   }
 
   SeqRow appendESRow(SeqRow esRow) {
     var row = new CassandraRow(esRow.aggId(), esRow.seqId(), esRow.value());
-    var statement = Utils.push(keyspace, table, row).setConsistencyLevel(writeConsistency);
+    var statement = CassandraUtils.push(keyspace, table, row).setConsistencyLevel(writeConsistency);
     var result = session.execute(statement);
     if (result.wasApplied()) {
       return esRow;
