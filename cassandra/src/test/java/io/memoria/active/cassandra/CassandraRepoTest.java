@@ -11,13 +11,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 
 @TestMethodOrder(OrderAnnotation.class)
-class CassandraESRowRepoTest {
+class CassandraRepoTest {
   private static final String KEYSPACE = "eventsourcing";
   private static final String TABLE = "events2" + System.currentTimeMillis();
   private static final String AGG_ID = "aggId";
   private static final CqlSession session = Infra.CqlSession();
   private static final CassandraAdmin admin = new CassandraAdmin(session);
-  private static final CassandraSeqRowRepo repo = new CassandraSeqRowRepo(session, KEYSPACE, TABLE);
+  private static final CassandraRepo repo = new CassandraRepo(session, KEYSPACE, TABLE);
   private static final int COUNT = 100;
   private static final List<SeqRow> rows = List.range(0, COUNT).map(i -> new SeqRow(AGG_ID, i, String.valueOf(i)));
 

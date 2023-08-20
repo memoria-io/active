@@ -15,7 +15,7 @@ import static com.datastax.oss.driver.api.core.ConsistencyLevel.LOCAL_QUORUM;
 /**
  * EventRepo's secondary/driven adapter of cassandra
  */
-public class CassandraSeqRowRepo implements SeqRowRepo {
+public class CassandraRepo implements SeqRowRepo {
   private final CqlSession session;
   private final ConsistencyLevel writeConsistency;
   private final ConsistencyLevel readConsistency;
@@ -25,15 +25,15 @@ public class CassandraSeqRowRepo implements SeqRowRepo {
   /**
    * Using LOCAL_QUORUM as default for read and write consistency
    */
-  public CassandraSeqRowRepo(CqlSession session, String keyspace, String table) {
+  public CassandraRepo(CqlSession session, String keyspace, String table) {
     this(session, LOCAL_QUORUM, LOCAL_QUORUM, keyspace, table);
   }
 
-  public CassandraSeqRowRepo(CqlSession session,
-                             ConsistencyLevel writeConsistency,
-                             ConsistencyLevel readConsistency,
-                             String keyspace,
-                             String table) {
+  public CassandraRepo(CqlSession session,
+                       ConsistencyLevel writeConsistency,
+                       ConsistencyLevel readConsistency,
+                       String keyspace,
+                       String table) {
     this.session = session;
     this.writeConsistency = writeConsistency;
     this.readConsistency = readConsistency;
