@@ -7,7 +7,6 @@ import io.vavr.collection.List;
 import io.vavr.collection.Stream;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -45,16 +44,15 @@ class CassandraUtilsTest {
   @Test
   @Order(0)
   void push() {
-    // Given
-    var statements = List.range(0, COUNT).map(i -> CassandraUtils.push(KEYSPACE, TABLE, createRow(AGG_ID, i)));
-    // When, Then
+    // When
+    var statements = List.range(0, COUNT).map(i -> CassandraUtils.push(KEYSPACE, TABLE, createRow(i)));
+    // Then
     Assertions.assertThatCode(() -> statements.flatMap(session::execute)).doesNotThrowAnyException();
   }
 
   @Test
   @Order(1)
   void getAll() {
-    // Given previous push
     // When
     var rs = session.execute(CassandraUtils.get(KEYSPACE, TABLE, AGG_ID, 0));
     var rows = StreamSupport.stream(rs.spliterator(), false);
@@ -71,35 +69,32 @@ class CassandraUtilsTest {
     var rows = session.execute(CassandraUtils.get(KEYSPACE, TABLE, AGG_ID, startIdx))
                       .map(CassandraUtils::toCassandraRow);
     // Then
-    Assertions.assertThat(Stream.ofAll(rows).size()).isEqualTo(COUNT);
+    Assertions.assertThat(Stream.ofAll(rows).size()).isEqualTo(COUNT - startIdx);
   }
 
   @Test
-  @Disabled
   void getLast() {
-    // Given
-    var statements = List.range(0, COUNT).map(i -> CassandraUtils.push(KEYSPACE, TABLE, createRow(AGG_ID, i)));
-    var rowFlux = statements.flatMap(session::execute).map(Row::getFormattedContents);
     // When
     var lastSeq = session.execute(CassandraUtils.getLast(KEYSPACE, TABLE, AGG_ID))
                          .map(CassandraUtils::toCassandraRow)
-                         .map(CassandraRow::seqId);
+                         .map(CassandraRow::seqId)
+                         .one();
     // Then
-    //    StepVerifier.create(lastSeq).expectNext(COUNT - 1).verifyComplete();
+    Assertions.assertThat(lastSeq).isEqualTo(COUNT - 1);
   }
 
   @Test
-  @Disabled
   void getLastButUnknown() {
     // Given
     var st = CassandraUtils.getLast(KEYSPACE, TABLE, "unknown");
     // When
-    var exec = session.execute(st).map(Row::getFormattedContents);
+    var spliterator = session.execute(st).map(CassandraUtils::toCassandraRow).spliterator();
+    var count = StreamSupport.stream(spliterator, false).count();
     // Then
-    //    StepVerifier.create(exec).verifyComplete();
+    Assertions.assertThat(count).isZero();
   }
 
-  private static CassandraRow createRow(String stateId, int i) {
-    return new CassandraRow(stateId, i, "{some event happened here}");
+  private static CassandraRow createRow(int i) {
+    return new CassandraRow(AGG_ID, i, "{some event happened here}");
   }
 }
