@@ -45,7 +45,7 @@ class CassandraRepoTest {
   @Order(1)
   void stream() {
     // When
-    var result = repo.stream(AGG_ID).get().toJavaList();
+    var result = repo.fetch(AGG_ID).get().toJavaList();
 
     // Then
     System.out.println(result);

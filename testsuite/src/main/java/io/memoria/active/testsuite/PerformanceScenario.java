@@ -9,6 +9,7 @@ import io.memoria.atom.testsuite.eventsourcing.banking.event.DebitConfirmed;
 import io.memoria.atom.testsuite.eventsourcing.banking.event.Debited;
 import io.memoria.atom.testsuite.eventsourcing.banking.state.Account;
 import io.memoria.reactive.eventsourcing.pipeline.PartitionPipeline;
+import io.vavr.Tuple;
 import io.vavr.collection.Stream;
 import io.vavr.control.Try;
 
@@ -44,20 +45,20 @@ public class PerformanceScenario implements PartitionScenario<AccountCommand, Ac
     var creditedIds = data.createIds(numOfAccounts, numOfAccounts).map(StateId::of);
     var createDebitedAcc = data.createAccountCmd(debitedIds, INITIAL_BALANCE);
     var createCreditedAcc = data.createAccountCmd(creditedIds, INITIAL_BALANCE);
-    var debitTheAccounts = data.debitCmd(debitedIds.zipWith(creditedIds), DEBIT_AMOUNT);
+    var debitTheAccounts = data.debitCmd(debitedIds.zipWith(creditedIds, Tuple::of), DEBIT_AMOUNT);
     var commands = Stream.concat(createDebitedAcc, createCreditedAcc, debitTheAccounts);
 
     return commands.map(pipeline::pubCommand).map(Try::get);
   }
 
   @Override
-  public Stream<AccountEvent> handleCommands() {
+  public Stream<Try<AccountEvent>> handleCommands() {
     return pipeline.handle();
   }
 
   @Override
-  public Mono<Boolean> verify() {
-    return pipeline.subToEvents().map(PerformanceScenario::isTypeOf).all(b -> b);
+  public boolean verify(StateId stateId) {
+    return pipeline.fetchEvents(stateId).map(Try::get).map(PerformanceScenario::isTypeOf).forAll(b -> b);
   }
 
   private static boolean isTypeOf(AccountEvent acc) {

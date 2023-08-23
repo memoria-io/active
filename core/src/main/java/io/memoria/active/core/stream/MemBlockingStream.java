@@ -20,9 +20,9 @@ class MemBlockingStream implements BlockingStream {
   }
 
   @Override
-  public Try<Stream<MsgResult>> stream(String topic, int partition, boolean fromStart) {
+  public Try<Stream<MsgResult>> fetch(String topic, int partition, boolean fromStart) {
     addTopic(topic, partition);
-    return this.topics.get(topic).get(partition).stream().map(tr -> tr.map(MemBlockingStream::toMsgResult));
+    return this.topics.get(topic).get(partition).fetch().map(tr -> tr.map(MemBlockingStream::toMsgResult));
   }
 
   @Override

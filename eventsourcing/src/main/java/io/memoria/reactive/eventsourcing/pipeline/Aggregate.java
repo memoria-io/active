@@ -13,7 +13,6 @@ import io.vavr.collection.Stream;
 import io.vavr.control.Option;
 import io.vavr.control.Try;
 
-import java.util.NoSuchElementException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -23,14 +22,14 @@ public class Aggregate<S extends State, C extends Command, E extends Event> {
   private final AtomicReference<S> state;
   private final AtomicInteger eventSeqId;
   private final EventRepo<E> eventRepo;
-  private final CommandTopic commandTopic;
+  private final CommandRoute commandRoute;
   private final CommandStream<C> commandStream;
   private final KCache<CommandId> processedCommands;
 
   public Aggregate(StateId stateId,
                    Domain<S, C, E> domain,
                    EventRepo<E> eventRepo,
-                   CommandTopic commandTopic,
+                   CommandRoute commandRoute,
                    CommandStream<C> commandStream,
                    KCache<CommandId> commandsCache) {
     this.stateId = stateId;
@@ -38,7 +37,7 @@ public class Aggregate<S extends State, C extends Command, E extends Event> {
     this.state = new AtomicReference<>();
     this.eventSeqId = new AtomicInteger();
     this.eventRepo = eventRepo;
-    this.commandTopic = commandTopic;
+    this.commandRoute = commandRoute;
     this.commandStream = commandStream;
     this.processedCommands = commandsCache;
   }
@@ -51,7 +50,7 @@ public class Aggregate<S extends State, C extends Command, E extends Event> {
     if (processedCommands.contains(cmd.meta().commandId())) {
       return Option.none();
     } else {
-      var result =  decide(cmd).peek(this::evolve).flatMap(this::saga).flatMap(this::append);
+      var result = decide(cmd).peek(this::evolve).flatMap(this::saga).flatMap(this::append);
       return Option.some(result);
     }
   }
@@ -87,7 +86,7 @@ public class Aggregate<S extends State, C extends Command, E extends Event> {
   }
 
   Try<C> publish(C cmd) {
-    var partition = cmd.meta().partition(commandTopic.totalPartitions());
-    return commandStream.append(commandTopic.name(), partition, cmd);
+    var partition = cmd.meta().partition(commandRoute.totalPartitions());
+    return commandStream.append(commandRoute.name(), partition, cmd);
   }
 }

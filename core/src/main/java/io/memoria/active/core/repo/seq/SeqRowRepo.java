@@ -6,7 +6,7 @@ import io.vavr.control.Try;
 public interface SeqRowRepo extends AutoCloseable {
   Try<SeqRow> append(SeqRow row);
 
-  Try<Stream<SeqRow>> stream(String aggId);
+  Try<Stream<SeqRow>> fetch(String aggId);
 
   Try<Integer> size(String aggId);
 

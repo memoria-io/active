@@ -70,7 +70,8 @@ class CassandraUtilsTest {
     var statements = List.range(0, COUNT).map(i -> CassandraUtils.push(KEYSPACE, TABLE, createRow(AGG_ID, i)));
     var isCreatedFlux = statements.flatMap(session::execute).map(Row::getFormattedContents);
     // When
-    var row = session.execute(CassandraUtils.get(KEYSPACE, TABLE, AGG_ID, startIdx)).map(CassandraUtils::toCassandraRow);
+    var row = session.execute(CassandraUtils.get(KEYSPACE, TABLE, AGG_ID, startIdx))
+                     .map(CassandraUtils::toCassandraRow);
     // Then
     System.out.println(row);
   }

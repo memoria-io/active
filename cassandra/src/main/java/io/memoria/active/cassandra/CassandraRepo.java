@@ -47,7 +47,7 @@ public class CassandraRepo implements SeqRowRepo {
   }
 
   @Override
-  public Try<Stream<SeqRow>> stream(String aggId) {
+  public Try<Stream<SeqRow>> fetch(String aggId) {
     return Try.of(() -> streamRows(aggId));
   }
 

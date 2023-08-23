@@ -2,6 +2,7 @@ package io.memoria.active.testsuite;
 
 import io.memoria.atom.eventsourcing.Command;
 import io.memoria.atom.eventsourcing.Event;
+import io.memoria.atom.eventsourcing.StateId;
 import io.vavr.collection.Stream;
 import io.vavr.control.Try;
 
@@ -12,7 +13,7 @@ public interface PartitionScenario<C extends Command, E extends Event> {
 
   Stream<C> publishCommands();
 
-  Stream<E> handleCommands();
+  Stream<Try<E>> handleCommands();
 
-  Try<Boolean> verify();
+  boolean verify(StateId stateId);
 }

@@ -24,7 +24,7 @@ public class CommandStream<C extends Command> {
   }
 
   public Stream<Try<CommandResult<C>>> stream(String topic, int partition) {
-    var result = stream.stream(topic, partition).map(tr -> tr.map(this::toCmd));
+    var result = stream.fetch(topic, partition).map(tr -> tr.map(this::toCmd));
     if (result.isSuccess()) {
       return result.get();
     } else {

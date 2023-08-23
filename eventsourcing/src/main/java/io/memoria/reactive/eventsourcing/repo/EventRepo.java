@@ -23,8 +23,13 @@ public class EventRepo<E extends Event> {
     return repo.size(aggId.value()).flatMap(size -> toRow(seqId, e)).flatMap(repo::append).map(row -> e);
   }
 
-  public Try<Stream<E>> fetch(StateId aggId) {
-    return repo.stream(aggId.value()).map(stream -> stream.map(this::toEvent).map(Try::get));
+  public Stream<Try<E>> fetch(StateId stateId) {
+    var result = repo.fetch(stateId.value());
+    if (result.isSuccess()) {
+      return result.get().map(this::toEvent);
+    } else {
+      return Stream.of(Try.failure(result.getCause()));
+    }
   }
 
   private Try<E> toEvent(SeqRow row) {

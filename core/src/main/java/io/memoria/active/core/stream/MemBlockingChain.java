@@ -43,7 +43,7 @@ class MemBlockingChain<T> implements BlockingChain<T> {
   }
 
   @Override
-  public Try<Stream<T>> stream() {
+  public Try<Stream<T>> fetch() {
     var firstTry = Try.of(() -> {
       latch.await();
       return first.get();

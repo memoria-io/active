@@ -23,7 +23,7 @@ class MemMsgRepo implements SeqRowRepo {
   }
 
   @Override
-  public Try<Stream<SeqRow>> stream(String aggId) {
+  public Try<Stream<SeqRow>> fetch(String aggId) {
     var stream = Stream.ofAll(getAgg(aggId).getOrElse(new ArrayList<>()));
     return Try.success(stream);
   }

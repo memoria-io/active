@@ -6,9 +6,9 @@ import io.vavr.control.Try;
 public interface BlockingStream extends AutoCloseable {
   Try<Msg> publish(String topic, int partition, Msg msg);
 
-  Try<Stream<MsgResult>> stream(String topic, int partition, boolean fromStart);
+  Try<Stream<MsgResult>> fetch(String topic, int partition, boolean fromStart);
 
-  default Try<Stream<MsgResult>> stream(String topic, int partition) {
-    return stream(topic, partition, true);
+  default Try<Stream<MsgResult>> fetch(String topic, int partition) {
+    return fetch(topic, partition, true);
   }
 }

@@ -43,7 +43,7 @@ public class KafkaStream implements BlockingStream {
   }
 
   @Override
-  public Try<Stream<MsgResult>> stream(String topic, int partition, boolean fromStart) {
+  public Try<Stream<MsgResult>> fetch(String topic, int partition, boolean fromStart) {
     return Try.of(() -> consume(topic, partition, fromStart));
   }
 

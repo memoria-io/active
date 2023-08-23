@@ -1,7 +1,6 @@
 package io.memoria.active.core.repo.seq;
 
 import io.vavr.collection.List;
-import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -36,7 +35,7 @@ class SeqRowRepoTest {
   @ValueSource(strings = {agg01, agg02})
   void stream(String agg) {
     AtomicInteger idx = new AtomicInteger(0);
-    for (SeqRow seqRow : repo.stream(agg).get()) {
+    for (SeqRow seqRow : repo.fetch(agg).get()) {
       assertThat(seqRow.seqId()).isEqualTo(idx.getAndIncrement());
       assertThat(seqRow.aggId()).isEqualTo(agg);
     }

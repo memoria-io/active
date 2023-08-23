@@ -21,8 +21,8 @@ class KafkaStreamTest {
   @Test
   void stream() {
     Thread.ofVirtual().start(this::publish);
-    stream.stream(topic, partition).get().take(count - 10).forEach(MsgResult::ack);
-    stream.stream(topic, partition, false).get().take(10).forEach(MsgResult::ack);
+    stream.fetch(topic, partition).get().take(count - 10).forEach(MsgResult::ack);
+    stream.fetch(topic, partition, false).get().take(10).forEach(MsgResult::ack);
   }
 
   private void publish() {
