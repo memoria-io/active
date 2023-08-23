@@ -48,7 +48,16 @@ class CassandraRepoTest {
     var result = repo.fetch(AGG_ID).get().toJavaList();
 
     // Then
-    System.out.println(result);
     Assertions.assertThat(result).containsExactlyElementsOf(rows);
+  }
+
+  @Test
+  @Order(2)
+  void size() {
+    // When
+    var result = repo.size(AGG_ID).get();
+
+    // Then
+    Assertions.assertThat(result).isEqualTo(COUNT);
   }
 }

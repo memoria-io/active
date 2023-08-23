@@ -55,7 +55,8 @@ public class CassandraRepo implements SeqRowRepo {
   public Try<Integer> size(String aggId) {
     return Try.of(() -> {
       var st = CassandraUtils.size(keyspace, table, aggId);
-      return Option.of(session.execute(st).one()).map(r -> r.getInt(0)).getOrElse(0);
+      var size = Option.of(session.execute(st).one()).map(r -> r.getLong(0)).getOrElse(0L);
+      return size.intValue();
     });
   }
 
