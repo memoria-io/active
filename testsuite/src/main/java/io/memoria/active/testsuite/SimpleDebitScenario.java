@@ -57,8 +57,7 @@ public class SimpleDebitScenario implements PartitionScenario<AccountCommand, Ac
 
   @Override
   public boolean verify(StateId stateId) {
-    var opt = Utils.reduce(pipeline.domain.evolver(),
-                           pipeline.fetchEvents(stateId).map(Try::get).take(expectedEventsCount()));
+    var opt = Utils.reduce(pipeline.domain.evolver(), pipeline.fetchEvents(stateId).get().take(expectedEventsCount()));
     var account = (OpenAccount) opt.get();
     return verify(account);
   }

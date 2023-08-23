@@ -4,6 +4,7 @@ import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.cql.ResultSet;
 import com.datastax.oss.driver.api.core.cql.Row;
 import io.vavr.collection.List;
+import io.vavr.collection.Stream;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
@@ -62,23 +63,20 @@ class CassandraUtilsTest {
   }
 
   @Test
-  @Disabled
+  @Order(2)
   void getWithOffset() {
     // Given
     int startIdx = 2;
-    // Given
-    var statements = List.range(0, COUNT).map(i -> CassandraUtils.push(KEYSPACE, TABLE, createRow(AGG_ID, i)));
-    var isCreatedFlux = statements.flatMap(session::execute).map(Row::getFormattedContents);
     // When
-    var row = session.execute(CassandraUtils.get(KEYSPACE, TABLE, AGG_ID, startIdx))
-                     .map(CassandraUtils::toCassandraRow);
+    var rows = session.execute(CassandraUtils.get(KEYSPACE, TABLE, AGG_ID, startIdx))
+                      .map(CassandraUtils::toCassandraRow);
     // Then
-    System.out.println(row);
+    Assertions.assertThat(Stream.ofAll(rows).size()).isEqualTo(COUNT);
   }
 
   @Test
   @Disabled
-  void get() {
+  void getLast() {
     // Given
     var statements = List.range(0, COUNT).map(i -> CassandraUtils.push(KEYSPACE, TABLE, createRow(AGG_ID, i)));
     var rowFlux = statements.flatMap(session::execute).map(Row::getFormattedContents);

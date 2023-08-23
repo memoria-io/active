@@ -42,8 +42,8 @@ public class Aggregate<S extends State, C extends Command, E extends Event> {
     this.processedCommands = commandsCache;
   }
 
-  Stream<Try<E>> initialize() {
-    return eventRepo.fetch(stateId).get().peek(this::evolve).map(Try::success);
+  Try<Stream<E>> initialize() {
+    return eventRepo.fetch(stateId).map(eTry -> eTry.map(this::evolve));
   }
 
   Option<Try<E>> handle(C cmd) {
@@ -64,7 +64,7 @@ public class Aggregate<S extends State, C extends Command, E extends Event> {
     }
   }
 
-  void evolve(E e) {
+  E evolve(E e) {
     S currentState = state.get();
     S newState;
     if (currentState == null) {
@@ -75,6 +75,7 @@ public class Aggregate<S extends State, C extends Command, E extends Event> {
     state.set(newState);
     eventSeqId.getAndIncrement();
     processedCommands.add(e.meta().commandId());
+    return e;
   }
 
   Try<E> saga(E e) {

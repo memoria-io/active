@@ -58,7 +58,7 @@ public class PerformanceScenario implements PartitionScenario<AccountCommand, Ac
 
   @Override
   public boolean verify(StateId stateId) {
-    return pipeline.fetchEvents(stateId).map(Try::get).map(PerformanceScenario::isTypeOf).forAll(b -> b);
+    return pipeline.fetchEvents(stateId).get().map(PerformanceScenario::isTypeOf).forAll(b -> b);
   }
 
   private static boolean isTypeOf(AccountEvent acc) {

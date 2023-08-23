@@ -13,12 +13,16 @@ import io.memoria.reactive.eventsourcing.stream.CommandResult;
 import io.memoria.reactive.eventsourcing.stream.CommandStream;
 import io.vavr.collection.Stream;
 import io.vavr.control.Try;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.NoSuchElementException;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class PartitionPipeline<S extends State, C extends Command, E extends Event> {
+  private static final Logger log = LoggerFactory.getLogger(PartitionPipeline.class.getName());
+
   public final Domain<S, C, E> domain;
   private final EventRepo<E> eventRepo;
   private final CommandRoute commandRoute;
@@ -51,22 +55,29 @@ public class PartitionPipeline<S extends State, C extends Command, E extends Eve
     return commandStream.append(commandRoute.name(), newPartition, cmd);
   }
 
-  public Stream<Try<E>> fetchEvents(StateId stateId) {
+  public Try<Stream<E>> fetchEvents(StateId stateId) {
     return eventRepo.fetch(stateId);
   }
 
   Try<E> handle(CommandResult<C> cmdResult) {
     StateId stateId = cmdResult.command().meta().stateId();
-    aggMap.putIfAbsent(stateId, createAggregate(stateId));
-    var result = aggMap.get(stateId).get().handle(cmdResult.command()).toTry().flatMap(Function.identity());
-    if (result.isSuccess() || result.getCause() instanceof NoSuchElementException) {
-      cmdResult.acknowledge().run();
-    }
-    return result;
+    return Try.of(() -> {
+      aggMap.putIfAbsent(stateId, k -> initAggregate(stateId));
+      var result = aggMap.get(stateId).get().handle(cmdResult.command()).toTry().flatMap(Function.identity());
+      if (result.isSuccess() || result.getCause() instanceof NoSuchElementException) {
+        cmdResult.acknowledge().run();
+      }
+      return result;
+    }).flatMap(Function.identity());
   }
 
-  private Aggregate<S, C, E> createAggregate(StateId stateId) {
-    return new Aggregate<>(stateId, domain, eventRepo, commandRoute, commandStream, cacheSupplier.get());
+  /**
+   * @return initialized aggregate
+   */
+  Aggregate<S, C, E> initAggregate(StateId stateId) {
+    var aggregate = new Aggregate<>(stateId, domain, eventRepo, commandRoute, commandStream, cacheSupplier.get());
+    aggregate.initialize().get().forEach(e -> log.info("Initializing with %s ".formatted(e.meta())));
+    return aggregate;
   }
 
   private boolean isValid(Try<E> tr) {
