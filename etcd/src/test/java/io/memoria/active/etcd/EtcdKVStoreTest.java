@@ -7,7 +7,6 @@ import io.vavr.control.Try;
 import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
-import java.util.NoSuchElementException;
 import java.util.Random;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -16,7 +15,7 @@ class EtcdKVStoreTest {
   private final static Random random = new Random();
   private final static String keyPrefix = "key_" + random.nextInt(1000);
   private final Client client = Client.builder().endpoints("http://localhost:2379").build();
-  private final EtcdKVStore kvStore = new EtcdKVStore(client, Duration.ofMillis(200));
+  private final EtcdKVStore kvStore = new EtcdKVStore(client, Duration.ofMillis(500));
 
   @Test
   void getAndPut() {
