@@ -1,5 +1,13 @@
 version: "3.3"
 services:
+  cassandra:
+    image: bitnami/cassandra:4.0.7
+    ports:
+      - "9042:9042"
+      - "7000:7000"
+    environment:
+      CASSANDRA_AUTHENTICATOR: AllowAllAuthenticator
+      CASSANDRA_AUTHORIZER: AllowAllAuthorizer
   etcd:
     image: bitnami/etcd:3.5.8
     environment:
@@ -8,3 +16,15 @@ services:
     ports:
       - 2379:2379
       - 2380:2380
+  kafka:
+    image: memoriaio/kafka-docker:20.0.0
+    ports:
+      - "9092:9092"
+      - "9093:9093"
+  nats:
+    image: nats:2.9.20-alpine
+    ports:
+      - "4222:4222"
+      - "6222:6222"
+      - "8222:8222"
+    command: --jetstream -m 8222 --store_dir /tmp/nats0

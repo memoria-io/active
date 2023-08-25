@@ -3,7 +3,7 @@ package io.memoria.active.etcd;
 import io.etcd.jetcd.ByteSequence;
 import io.etcd.jetcd.Client;
 import io.etcd.jetcd.KV;
-import io.memoria.active.core.repo.KVStore;
+import io.memoria.active.core.repo.kv.KVStore;
 import io.vavr.control.Option;
 import io.vavr.control.Try;
 
@@ -12,7 +12,6 @@ import java.time.Duration;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.function.Function;
 
 public class EtcdKVStore implements KVStore {
   private final KV kv;
@@ -27,8 +26,8 @@ public class EtcdKVStore implements KVStore {
    * @return first value of such key and ignores any other
    */
   @Override
-  public Try<String> get(String key) {
-    return Try.of(() -> getValue(key).toTry()).flatMap(Function.identity());
+  public Try<Option<String>> get(String key) {
+    return Try.of(() -> getValue(key));
   }
 
   /**

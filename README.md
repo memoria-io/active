@@ -78,9 +78,14 @@ Format Example: `JDK_Version.major.mino`
 
 ## TODOs
 
-* [ ] Event sourcing using Virtual threads
-* [ ] Project helidon/nima adaption
+* [x] Blocking Event sourcing
+* [x] Blocking Event repo implementation
+* [x] Blocking kafka and nats adapters
+* [x] Blocking Cassandra adapter
+* [x] testsuite implementation
+* [ ] Performance testing
 * [ ] JVM Profiling
+* [ ] Project helidon/nima adoption
 * [ ] More structured releases based on PRs
 
 ## Release notes
