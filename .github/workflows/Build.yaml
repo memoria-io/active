@@ -22,7 +22,7 @@ jobs:
       - name: Docker compose
         run: docker-compose up -d
       - name: Sleeping
-        run: sleep 10
+        run: sleep 30
       - name: Cache Maven packages
         uses: actions/cache@v1
         with:
