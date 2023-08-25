@@ -36,7 +36,7 @@ class EtcdKVStoreTest {
 
   @Test
   void notFound() {
-    assertThat(kvStore.get("some_value").getCause()).isInstanceOf(NoSuchElementException.class);
+    assertThat(kvStore.get("some_value").get().isEmpty()).isTrue();
   }
 
   private static String toKey(int i) {
