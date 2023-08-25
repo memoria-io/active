@@ -78,13 +78,14 @@ Format Example: `JDK_Version.major.mino`
 
 ## TODOs
 
-* [ ] Blocking Event sourcing
-* [ ] Blocking Event repo implementation
-* [ ] Blocking kafka and nats adapters
-* [ ] Project helidon/nima adoption
-* [ ] JVM Profiling
+* [x] Blocking Event sourcing
+* [x] Blocking Event repo implementation
+* [x] Blocking kafka and nats adapters
+* [x] Blocking Cassandra adapter
+* [x] testsuite implementation
 * [ ] Performance testing
-* [ ] testsuite implementation
+* [ ] JVM Profiling
+* [ ] Project helidon/nima adoption
 * [ ] More structured releases based on PRs
 
 ## Release notes
