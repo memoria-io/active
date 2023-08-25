@@ -38,6 +38,11 @@
             <artifactId>nats</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
+        <dependency>
+            <groupId>io.memoria.active</groupId>
+            <artifactId>cassandra</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
 
         <!--======================================================================================== -->
         <!-- Atom Dependencies -->

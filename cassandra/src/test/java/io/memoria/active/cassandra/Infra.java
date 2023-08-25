@@ -9,7 +9,7 @@ public class Infra {
 
   private Infra() {}
 
-  public static CqlSession CqlSession() {
+  public static CqlSession cqlSession() {
     return session("datacenter1", "localhost", 9042).build();
   }
 

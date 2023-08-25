@@ -15,7 +15,7 @@ class CassandraRepoTest {
   private static final String KEYSPACE = "eventsourcing";
   private static final String TABLE = "events2" + System.currentTimeMillis();
   private static final String AGG_ID = "aggId";
-  private static final CqlSession session = Infra.CqlSession();
+  private static final CqlSession session = Infra.cqlSession();
   private static final CassandraAdmin admin = new CassandraAdmin(session);
   private static final CassandraRepo repo = new CassandraRepo(session, KEYSPACE, TABLE);
   private static final int COUNT = 100;

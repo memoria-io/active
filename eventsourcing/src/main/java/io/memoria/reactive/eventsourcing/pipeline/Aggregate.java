@@ -42,11 +42,11 @@ public class Aggregate<S extends State, C extends Command, E extends Event> {
     this.processedCommands = commandsCache;
   }
 
-  Try<Stream<E>> initialize() {
+  public Try<Stream<E>> initialize() {
     return eventRepo.fetch(stateId).map(eTry -> eTry.map(this::evolve));
   }
 
-  Option<Try<E>> handle(C cmd) {
+  public Option<Try<E>> handle(C cmd) {
     if (processedCommands.contains(cmd.meta().commandId())) {
       return Option.none();
     } else {

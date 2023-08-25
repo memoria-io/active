@@ -11,4 +11,8 @@ public interface BlockingStream extends AutoCloseable {
   default Try<Stream<MsgResult>> fetch(String topic, int partition) {
     return fetch(topic, partition, true);
   }
+
+  static BlockingStream inMemory() {
+    return new MemBlockingStream();
+  }
 }

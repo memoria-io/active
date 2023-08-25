@@ -41,12 +41,11 @@ public class SimpleDebitScenario implements PartitionScenario<AccountCommand, Ac
   @Override
   public Stream<AccountCommand> publishCommands() {
     var debitedIds = data.createIds(0, numOfAccounts).map(StateId::of);
-    var creditedIds = data.createIds(numOfAccounts, numOfAccounts).map(StateId::of);
+    var creditedIds = data.createIds(numOfAccounts, numOfAccounts*2).map(StateId::of);
     var createDebitedAcc = data.createAccountCmd(debitedIds, INITIAL_BALANCE);
     var createCreditedAcc = data.createAccountCmd(creditedIds, INITIAL_BALANCE);
     var debitTheAccounts = data.debitCmd(debitedIds.zipWith(creditedIds, Tuple::of), DEBIT_AMOUNT);
     var commands = createDebitedAcc.appendAll(createCreditedAcc).appendAll(debitTheAccounts);
-
     return Stream.ofAll(commands.map(pipeline::pubCommand)).map(Try::get);
   }
 

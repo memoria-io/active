@@ -1,7 +1,18 @@
 package io.memoria.reactive.testsuite;
 
+import com.datastax.oss.driver.api.core.CqlSession;
+import com.datastax.oss.driver.api.core.CqlSessionBuilder;
+import io.memoria.active.cassandra.CassandraAdmin;
+import io.memoria.active.cassandra.CassandraRepo;
+import io.memoria.active.core.repo.seq.SeqRowRepo;
+import io.memoria.active.core.stream.BlockingStream;
+import io.memoria.active.kafka.KafkaStream;
 import io.memoria.active.nats.NatsConfig;
+import io.memoria.active.nats.NatsStream;
+import io.memoria.atom.core.caching.KCache;
+import io.memoria.atom.core.caching.KVCache;
 import io.memoria.atom.core.id.Id;
+import io.memoria.atom.core.text.SerializableTransformer;
 import io.memoria.atom.eventsourcing.Domain;
 import io.memoria.atom.testsuite.eventsourcing.banking.AccountDecider;
 import io.memoria.atom.testsuite.eventsourcing.banking.AccountEvolver;
@@ -9,6 +20,10 @@ import io.memoria.atom.testsuite.eventsourcing.banking.AccountSaga;
 import io.memoria.atom.testsuite.eventsourcing.banking.command.AccountCommand;
 import io.memoria.atom.testsuite.eventsourcing.banking.event.AccountEvent;
 import io.memoria.atom.testsuite.eventsourcing.banking.state.Account;
+import io.memoria.reactive.eventsourcing.pipeline.CommandRoute;
+import io.memoria.reactive.eventsourcing.pipeline.PartitionPipeline;
+import io.memoria.reactive.eventsourcing.repo.EventRepo;
+import io.memoria.reactive.eventsourcing.stream.CommandStream;
 import io.nats.client.api.StorageType;
 import io.vavr.collection.HashMap;
 import io.vavr.collection.Map;
@@ -19,12 +34,16 @@ import org.apache.kafka.common.serialization.StringSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.time.Duration;
 import java.util.function.Supplier;
 
 public class Infra {
   private static final Logger log = LoggerFactory.getLogger(Infra.class.getName());
   public static final Duration TIMEOUT = Duration.ofMillis(500);
+  public static final String keyspace = "event_sourcing";
+
 
   public enum StreamType {
     KAFKA,
@@ -40,32 +59,54 @@ public class Infra {
                                                                      Duration.ofMillis(100),
                                                                      Duration.ofMillis(300));
 
-  //  public static PartitionPipeline<Account, AccountCommand, AccountEvent> pipeline(Supplier<Id> idSupplier,
-  //                                                                                  Supplier<Long> timeSupplier,
-  //                                                                                  StreamType streamType,
-  //                                                                                  CommandRoute commandRoute,
-  //                                                                                  EventRoute eventRoute)
-  //          throws IOException, InterruptedException {
-  //
-  //    var transformer = new SerializableTransformer();
-  //
-  //    // Stream
-  //    var msgStream = msgStream(streamType);
-  //    var commandStream = CommandStream.msgStream(msgStream, AccountCommand.class, transformer);
-  //    var eventStream = EventStream.msgStream(msgStream, AccountEvent.class, transformer);
-  //
-  //    // Pipeline
-  //    var domain = domain(idSupplier, timeSupplier);
-  //    return new PartitionPipeline<>(domain, commandStream, commandRoute, eventStream, eventRoute);
-  //  }
-  //
-  //  public static MsgStream msgStream(StreamType streamType) throws IOException, InterruptedException {
-  //    return switch (streamType) {
-  //      case KAFKA -> new KafkaMsgStream(kafkaProducerConfigs(), kafkaConsumerConfigs(), Duration.ofMillis(500));
-  //      case NATS -> new NatsMsgStream(NATS_CONFIG, Schedulers.boundedElastic());
-  //      case MEMORY -> MsgStream.inMemory();
-  //    };
-  //  }
+  public static PartitionPipeline<Account, AccountCommand, AccountEvent> pipeline(Supplier<Id> idSupplier,
+                                                                                  Supplier<Long> timeSupplier,
+                                                                                  StreamType streamType,
+                                                                                  CommandRoute commandRoute)
+          throws IOException, InterruptedException {
+
+    var transformer = new SerializableTransformer();
+
+    // Stream
+    var msgStream = msgStream(streamType);
+    var commandStream = new CommandStream<>(msgStream, AccountCommand.class, transformer);
+    var eventRepo = new EventRepo<>(seqRowRepo(), AccountEvent.class, transformer);
+
+    // Pipeline
+    var domain = domain(idSupplier, timeSupplier);
+    return new PartitionPipeline<>(domain,
+                                   eventRepo,
+                                   commandRoute,
+                                   commandStream,
+                                   KVCache.inMemory(1000),
+                                   () -> KCache.inMemory(1000));
+  }
+
+  public static SeqRowRepo seqRowRepo() {
+    String eventsTable = "events" + System.currentTimeMillis();
+    var admin = new CassandraAdmin(cqlSession());
+    admin.createKeyspace(keyspace, 1);
+    admin.createTopicTable(keyspace, eventsTable);
+    log.info("Keyspace %s created".formatted(keyspace));
+    return new CassandraRepo(cqlSession(), keyspace, eventsTable);
+  }
+
+  public static CqlSession cqlSession() {
+    return session("datacenter1", "localhost", 9042).build();
+  }
+
+  public static CqlSessionBuilder session(String datacenter, String ip, int port) {
+    var sock = InetSocketAddress.createUnresolved(ip, port);
+    return CqlSession.builder().withLocalDatacenter(datacenter).addContactPoint(sock);
+  }
+
+  public static BlockingStream msgStream(StreamType streamType) throws IOException, InterruptedException {
+    return switch (streamType) {
+      case KAFKA -> new KafkaStream(kafkaProducerConfigs(), kafkaConsumerConfigs(), Duration.ofMillis(500));
+      case NATS -> new NatsStream(NATS_CONFIG, Duration.ofMillis(100));
+      case MEMORY -> BlockingStream.inMemory();
+    };
+  }
 
   public static Domain<Account, AccountCommand, AccountEvent> domain(Supplier<Id> idSupplier,
                                                                      Supplier<Long> timeSupplier) {
@@ -77,7 +118,7 @@ public class Infra {
                         new AccountSaga(idSupplier, timeSupplier));
   }
 
-  public static String topicName(String postfix) {
+  public static String commandTopic(String postfix) {
     return "topic%d_%s".formatted(System.currentTimeMillis(), postfix);
   }
 

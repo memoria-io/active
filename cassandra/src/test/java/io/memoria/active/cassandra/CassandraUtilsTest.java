@@ -20,7 +20,7 @@ class CassandraUtilsTest {
   private static final String KEYSPACE = "eventsourcing";
   private static final String TABLE = "events" + System.currentTimeMillis();
   private static final String AGG_ID = "aggId";
-  private static final CqlSession session = Infra.CqlSession();
+  private static final CqlSession session = Infra.cqlSession();
   private static final int COUNT = 100;
 
   @BeforeAll
