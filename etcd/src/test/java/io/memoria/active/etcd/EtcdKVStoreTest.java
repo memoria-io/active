@@ -20,7 +20,7 @@ class EtcdKVStoreTest {
   @Test
   void getAndPut() {
     // Given
-    int count = 10;
+    int count = 100;
 
     // When
     var setKV = List.range(0, count).map(i -> kvStore.set(toKey(i), toValue(i))).map(Try::get).toJavaList();
