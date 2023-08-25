@@ -19,6 +19,7 @@ jobs:
         uses: actions/setup-java@v2
         with:
           java-version: '20'
+          distribution: oracle
       - name: Docker compose
         run: docker-compose up -d
       - name: Sleeping
