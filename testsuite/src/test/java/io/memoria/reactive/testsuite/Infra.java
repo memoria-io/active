@@ -44,7 +44,6 @@ public class Infra {
   public static final Duration TIMEOUT = Duration.ofMillis(500);
   public static final String keyspace = "event_sourcing";
 
-
   public enum StreamType {
     KAFKA,
     NATS,
