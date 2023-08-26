@@ -42,7 +42,7 @@ class ESScenarioTest {
     assertThat(published.size()).isEqualTo(numOfAccounts * 3L);
 
     // Then
-    var eventsSize = scenario.handleCommands().peek(System.out::println).take(numOfAccounts * 5).size();
+    var eventsSize = scenario.handleCommands().take(numOfAccounts * 5).size();
     assertThat(eventsSize).isEqualTo(numOfAccounts * 5L);
 
     // And

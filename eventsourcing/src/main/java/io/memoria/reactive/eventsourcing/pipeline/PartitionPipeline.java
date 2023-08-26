@@ -60,7 +60,6 @@ public class PartitionPipeline<S extends State, C extends Command, E extends Eve
   }
 
   Try<E> handle(CommandResult<C> cmdResult) {
-    System.out.println(cmdResult);
     StateId stateId = cmdResult.command().meta().stateId();
     return Try.of(() -> {
       aggMap.putIfAbsent(stateId, k -> initAggregate(stateId));
