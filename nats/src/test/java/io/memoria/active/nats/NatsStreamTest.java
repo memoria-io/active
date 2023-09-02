@@ -1,44 +1,54 @@
 package io.memoria.active.nats;
 
 import io.memoria.active.core.stream.Msg;
-import io.memoria.active.core.stream.MsgResult;
 import io.nats.client.JetStreamApiException;
 import io.vavr.collection.Stream;
 import io.vavr.control.Try;
+import org.assertj.core.api.Assertions;
+import org.awaitility.Awaitility;
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 
 import java.io.IOException;
 import java.time.Duration;
 
 import static io.memoria.active.nats.Infra.NATS_CONFIG;
-import static org.assertj.core.api.Assertions.assertThat;
 
+@TestMethodOrder(OrderAnnotation.class)
 class NatsStreamTest {
-  private static final int count = 1000;
-  private final String topic = "commands_" + System.currentTimeMillis();
-  private final int partition = 0;
-  private final NatsStream stream = new NatsStream(NATS_CONFIG, Duration.ofMillis(500));
+  private static final int count = 10_000;
+  private static final String topic = "commands_" + System.currentTimeMillis();
+  private static final int partition = 0;
+  private static final NatsStream stream;
+  private static boolean await = false;
 
-  NatsStreamTest() throws IOException, InterruptedException, JetStreamApiException {
-    NatsUtils.createOrUpdateTopic(NATS_CONFIG, topic, 1);
+  static {
+    try {
+      stream = new NatsStream(NATS_CONFIG, Duration.ofMillis(500));
+      NatsUtils.createOrUpdateTopic(NATS_CONFIG, topic, 1);
+    } catch (IOException | InterruptedException | JetStreamApiException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   @Test
+  @Order(0)
+  void publishing() {
+    await = Stream.range(0, count)
+                  .map(String::valueOf)
+                  .map(i -> new Msg(i, i))
+                  .map(msg -> stream.publish(topic, partition, msg))
+                  .map(Try::isSuccess)
+                  .forAll(b -> b);
+    Awaitility.await().timeout(Duration.ofSeconds(3)).until(() -> await);
+  }
+
+  @Test
+  @Order(1)
   void stream() {
-    Thread.ofVirtual().start(this::publish);
-    stream.fetch(topic, partition).get().take(count - 10).forEach(MsgResult::ack);
-    stream.fetch(topic, partition, false).get().take(10).forEach(MsgResult::ack);
-  }
-
-  private void publish() {
-    Stream.range(0, count)
-          .map(String::valueOf)
-          .map(i -> new Msg(i, i))
-          .map(msg -> stream.publish(topic, partition, msg).onFailure(Throwable::printStackTrace))
-          .forEach(NatsStreamTest::assertSuccess);
-  }
-
-  private static void assertSuccess(Try<?> result) {
-    assertThat(result.isSuccess()).isTrue();
+    var size = stream.fetch(topic, partition).get().take(count).size();
+    Assertions.assertThat(size).isEqualTo(count);
   }
 }

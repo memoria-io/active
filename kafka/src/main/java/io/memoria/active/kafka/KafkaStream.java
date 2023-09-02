@@ -2,10 +2,8 @@ package io.memoria.active.kafka;
 
 import io.memoria.active.core.stream.BlockingStream;
 import io.memoria.active.core.stream.Msg;
-import io.memoria.active.core.stream.MsgResult;
 import io.vavr.collection.Map;
 import io.vavr.collection.Stream;
-import io.vavr.control.Option;
 import io.vavr.control.Try;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.producer.KafkaProducer;
@@ -15,7 +13,6 @@ import org.apache.kafka.common.TopicPartition;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -43,8 +40,8 @@ public class KafkaStream implements BlockingStream {
   }
 
   @Override
-  public Try<Stream<MsgResult>> fetch(String topic, int partition, boolean fromStart) {
-    return Try.of(() -> consume(topic, partition, fromStart));
+  public Try<Stream<Msg>> fetch(String topic, int partition) {
+    return Try.of(() -> consume(topic, partition));
   }
 
   @Override
@@ -58,19 +55,13 @@ public class KafkaStream implements BlockingStream {
     return this.kafkaProducer.send(toRecord(topic, partition, msg)).get(timeout.toMillis(), TimeUnit.MILLISECONDS);
   }
 
-  private Stream<MsgResult> consume(String topic, int partition, boolean fromStart) {
+  private Stream<Msg> consume(String topic, int partition) {
     var consumer = new KafkaConsumer<String, String>(consumerConfig.toJavaMap());
     this.kafkaConsumers.add(consumer);
     var tp = new TopicPartition(topic, partition);
     var tpCol = io.vavr.collection.List.of(tp).toJavaList();
     consumer.assign(tpCol);
-    if (fromStart) {
-      consumer.seekToBeginning(tpCol);
-    } else {
-      Option.of(consumer.committed(Set.of(tp)).get(tp)).forEach(offset -> consumer.seek(tp, offset));
-    }
-    return KafkaUtils.consume(consumer, tp, timeout)
-                     .map(KafkaUtils::toMsg)
-                     .map(msg -> KafkaUtils.toMsgResult(msg, consumer::commitSync));
+    consumer.seekToBeginning(tpCol);
+    return KafkaUtils.consume(consumer, tp, timeout).map(KafkaUtils::toMsg);
   }
 }

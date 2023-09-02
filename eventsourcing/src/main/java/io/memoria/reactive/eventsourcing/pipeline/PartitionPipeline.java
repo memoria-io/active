@@ -9,7 +9,6 @@ import io.memoria.atom.eventsourcing.Event;
 import io.memoria.atom.eventsourcing.State;
 import io.memoria.atom.eventsourcing.StateId;
 import io.memoria.reactive.eventsourcing.repo.EventRepo;
-import io.memoria.reactive.eventsourcing.stream.CommandResult;
 import io.memoria.reactive.eventsourcing.stream.CommandStream;
 import io.vavr.collection.Stream;
 import io.vavr.control.Try;
@@ -59,15 +58,11 @@ public class PartitionPipeline<S extends State, C extends Command, E extends Eve
     return eventRepo.fetch(stateId);
   }
 
-  Try<E> handle(CommandResult<C> cmdResult) {
-    StateId stateId = cmdResult.command().meta().stateId();
+  Try<E> handle(C cmd) {
+    StateId stateId = cmd.meta().stateId();
     return Try.of(() -> {
       aggMap.putIfAbsent(stateId, k -> initAggregate(stateId));
-      var result = aggMap.get(stateId).get().handle(cmdResult.command()).toTry().flatMap(Function.identity());
-      if (result.isSuccess() || result.getCause() instanceof NoSuchElementException) {
-        cmdResult.acknowledge().run();
-      }
-      return result;
+      return aggMap.get(stateId).get().handle(cmd).toTry().flatMap(Function.identity());
     }).flatMap(Function.identity());
   }
 
