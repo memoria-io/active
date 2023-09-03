@@ -19,8 +19,8 @@ public class EventRepo<E extends Event> {
     this.transformer = transformer;
   }
 
-  public Try<E> append(StateId aggId, int seqId, E e) {
-    return repo.size(aggId.value()).flatMap(size -> toRow(seqId, e)).flatMap(repo::append).map(row -> e);
+  public Try<E> append(E e, int seqId) {
+    return repo.size(e.meta().stateId().value()).flatMap(size -> toRow(seqId, e)).flatMap(repo::append).map(row -> e);
   }
 
   public Try<Stream<E>> fetch(StateId stateId) {

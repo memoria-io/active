@@ -6,8 +6,8 @@ import io.memoria.atom.eventsourcing.Domain;
 import io.memoria.atom.eventsourcing.Event;
 import io.memoria.atom.eventsourcing.State;
 import io.memoria.atom.eventsourcing.StateId;
+import io.memoria.reactive.eventsourcing.repo.CommandPublisher;
 import io.memoria.reactive.eventsourcing.repo.EventRepo;
-import io.memoria.reactive.eventsourcing.stream.CommandStream;
 import io.vavr.collection.Stream;
 import io.vavr.control.Option;
 import io.vavr.control.Try;
@@ -23,22 +23,19 @@ public class Aggregate<S extends State, C extends Command, E extends Event> {
   private final AtomicReference<S> state;
   private final AtomicInteger eventSeqId;
   private final EventRepo<E> eventRepo;
-  private final CommandRoute commandRoute;
-  private final CommandStream<C> commandStream;
+  private final CommandPublisher<C> commandPublisher;
   private final Set<CommandId> processedCommands;
 
   public Aggregate(StateId stateId,
                    Domain<S, C, E> domain,
                    EventRepo<E> eventRepo,
-                   CommandRoute commandRoute,
-                   CommandStream<C> commandStream) {
+                   CommandPublisher<C> commandPublisher) {
     this.stateId = stateId;
     this.domain = domain;
     this.state = new AtomicReference<>();
     this.eventSeqId = new AtomicInteger();
     this.eventRepo = eventRepo;
-    this.commandRoute = commandRoute;
-    this.commandStream = commandStream;
+    this.commandPublisher = commandPublisher;
     this.processedCommands = new HashSet<>();
   }
 
@@ -51,17 +48,8 @@ public class Aggregate<S extends State, C extends Command, E extends Event> {
     }
   }
 
-  public Try<C> publish(C cmd) {
-    var partition = cmd.meta().partition(commandRoute.totalPartitions());
-    return commandStream.append(commandRoute.name(), partition, cmd);
-  }
-
-  Try<Stream<E>> fetchEvents() {
-    return eventRepo.fetch(stateId);
-  }
-
   Try<E> publish(E event) {
-    return eventRepo.append(event.meta().stateId(), eventSeqId.get(), event);
+    return eventRepo.append(event, eventSeqId.get());
   }
 
   Try<Stream<E>> initialize() {
@@ -92,6 +80,6 @@ public class Aggregate<S extends State, C extends Command, E extends Event> {
   }
 
   Try<E> saga(E e) {
-    return domain.saga().apply(e).map(this::publish).map(tr -> tr.map(c -> e)).getOrElse(Try.success(e));
+    return domain.saga().apply(e).map(commandPublisher::publish).map(tr -> tr.map(c -> e)).getOrElse(Try.success(e));
   }
 }
