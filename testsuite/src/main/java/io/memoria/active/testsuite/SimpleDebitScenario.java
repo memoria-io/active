@@ -8,12 +8,12 @@ import io.memoria.atom.testsuite.eventsourcing.banking.state.OpenAccount;
 import io.memoria.reactive.eventsourcing.Utils;
 import io.memoria.reactive.eventsourcing.pipeline.AggregatePool;
 import io.vavr.Tuple;
-import io.vavr.collection.Stream;
+import io.vavr.collection.List;
 import io.vavr.control.Option;
 import io.vavr.control.Try;
 
 @SuppressWarnings("ClassCanBeRecord")
-public class SimpleDebitScenario implements ESScenario<AccountCommand, AccountEvent> {
+public class SimpleDebitScenario implements ESScenario<AccountEvent> {
   public static final int INITIAL_BALANCE = 500;
   public static final int DEBIT_AMOUNT = 300;
 
@@ -40,14 +40,13 @@ public class SimpleDebitScenario implements ESScenario<AccountCommand, AccountEv
   }
 
   @Override
-  public Stream<Option<Try<AccountEvent>>> handleCommands() {
+  public List<Option<Try<AccountEvent>>> handleCommands() {
     var debitedIds = data.createIds(0, numOfAccounts).map(StateId::of);
     var creditedIds = data.createIds(numOfAccounts, numOfAccounts * 2).map(StateId::of);
     var createDebitedAcc = data.createAccountCmd(debitedIds, INITIAL_BALANCE);
     var createCreditedAcc = data.createAccountCmd(creditedIds, INITIAL_BALANCE);
     var debitTheAccounts = data.debitCmd(debitedIds.zipWith(creditedIds, Tuple::of), DEBIT_AMOUNT);
-    var commands = createDebitedAcc.appendAll(createCreditedAcc).appendAll(debitTheAccounts);
-    return Stream.ofAll(commands.map(pipeline::handle));
+    return createDebitedAcc.appendAll(createCreditedAcc).appendAll(debitTheAccounts).map(pipeline::handle);
   }
 
   @Override

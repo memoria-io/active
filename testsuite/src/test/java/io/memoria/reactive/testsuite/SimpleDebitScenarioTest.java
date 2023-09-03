@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 import static io.memoria.reactive.testsuite.Infra.aggregatePool;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class ESScenarioTest {
+class SimpleDebitScenarioTest {
   private static final Data data = Data.ofUUID();
   private static final AggregatePool<Account, AccountCommand, AccountEvent> aggPool;
 
@@ -21,7 +21,7 @@ class ESScenarioTest {
   }
 
   @Test
-  void simpleDebitScenario() {
+  void scenario() {
     // Given
     int numOfAccounts = 10;
 
