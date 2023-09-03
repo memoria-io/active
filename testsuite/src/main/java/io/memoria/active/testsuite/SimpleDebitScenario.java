@@ -13,7 +13,7 @@ import io.vavr.control.Option;
 import io.vavr.control.Try;
 
 @SuppressWarnings("ClassCanBeRecord")
-public class SimpleDebitScenario implements PartitionScenario<AccountCommand, AccountEvent> {
+public class SimpleDebitScenario implements ESScenario<AccountCommand, AccountEvent> {
   public static final int INITIAL_BALANCE = 500;
   public static final int DEBIT_AMOUNT = 300;
 

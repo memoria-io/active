@@ -16,9 +16,8 @@ import io.memoria.atom.testsuite.eventsourcing.banking.command.AccountCommand;
 import io.memoria.atom.testsuite.eventsourcing.banking.event.AccountEvent;
 import io.memoria.atom.testsuite.eventsourcing.banking.state.Account;
 import io.memoria.reactive.eventsourcing.pipeline.AggregatePool;
-import io.memoria.reactive.eventsourcing.repo.CommandPublisher;
 import io.memoria.reactive.eventsourcing.repo.EventRepo;
-import io.vavr.control.Try;
+import io.memoria.reactive.eventsourcing.repo.MemCommandPublisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,21 +27,12 @@ import java.util.function.Supplier;
 public class Infra {
   private static final Logger log = LoggerFactory.getLogger(Infra.class.getName());
   public static final String keyspace = "event_sourcing";
+  public static final MemCommandPublisher<AccountCommand> commandPublisher = new MemCommandPublisher<>();
 
   public static AggregatePool<Account, AccountCommand, AccountEvent> aggregatePool(Supplier<Id> idSupplier,
                                                                                    Supplier<Long> timeSupplier) {
-
     var transformer = new SerializableTransformer();
-
-    // Stream
-    var commandPublisher = new CommandPublisher<AccountCommand>() {
-      @Override
-      public Try<AccountCommand> publish(AccountCommand accountCommand) {
-        return null;
-      }
-    };
     var eventRepo = new EventRepo<>(seqRowRepo(), AccountEvent.class, transformer);
-
     // Pipeline
     var domain = domain(idSupplier, timeSupplier);
     return new AggregatePool<>(domain, eventRepo, commandPublisher, KVCache.inMemory(1000));

@@ -7,7 +7,7 @@ import io.vavr.collection.Stream;
 import io.vavr.control.Option;
 import io.vavr.control.Try;
 
-public interface PartitionScenario<C extends Command, E extends Event> {
+public interface ESScenario<C extends Command, E extends Event> {
   int expectedCommandsCount();
 
   int expectedEventsCount();
