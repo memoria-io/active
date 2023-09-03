@@ -2,7 +2,6 @@ package io.memoria.active.nats;
 
 import io.memoria.active.core.stream.BlockingStream;
 import io.memoria.active.core.stream.Msg;
-import io.memoria.active.core.stream.MsgResult;
 import io.nats.client.Connection;
 import io.nats.client.JetStream;
 import io.nats.client.JetStreamSubscription;
@@ -43,7 +42,7 @@ public class NatsStream implements BlockingStream {
   }
 
   @Override
-  public Try<Stream<MsgResult>> fetch(String topic, int partition, boolean fromStart) {
+  public Try<Stream<Msg>> fetch(String topic, int partition) {
     var subscriptionTry = createSubscription(this.jetStream, DeliverPolicy.All, topic, partition);
     return subscriptionTry.map(this::messageStream);
   }
@@ -54,9 +53,9 @@ public class NatsStream implements BlockingStream {
     connection.close();
   }
 
-  private Stream<MsgResult> messageStream(JetStreamSubscription sub) {
+  private Stream<Msg> messageStream(JetStreamSubscription sub) {
     return Stream.continually(() -> fetchMessages(sub, natsConfig.fetchBatchSize(), natsConfig.fetchMaxWait()))
                  .flatMap(Stream::ofAll)
-                 .map(NatsUtils::toMsgResult);
+                 .map(NatsUtils::toMsg);
   }
 }

@@ -67,7 +67,7 @@ public class SimpleDebitScenario implements PartitionScenario<AccountCommand, Ac
     } else if (acc.creditCount() > 0) {
       return acc.balance() == INITIAL_BALANCE + DEBIT_AMOUNT;
     } else {
-      return acc.balance() == INITIAL_BALANCE;
+      throw new IllegalStateException(acc.toString());
     }
   }
 }

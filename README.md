@@ -31,7 +31,7 @@ The project is also based on the parent atom utilities library and driven by sam
 
 ### Core module
 
-Core module has basic set of utilities and standard interfaces for virtual thread based streams and event repos:
+* Has basic set of utilities and standard interfaces for virtual thread based streams and event repos:
 
 ### `web` module
 

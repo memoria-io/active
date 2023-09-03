@@ -1,7 +1,6 @@
 package io.memoria.active.nats;
 
 import io.memoria.active.core.stream.Msg;
-import io.memoria.active.core.stream.MsgResult;
 import io.nats.client.Connection;
 import io.nats.client.ErrorListener;
 import io.nats.client.JetStream;
@@ -65,7 +64,7 @@ public class NatsUtils {
                                                               String topic,
                                                               int partition) {
     var config = ConsumerConfiguration.builder()
-                                      .ackPolicy(AckPolicy.Explicit)
+                                      .ackPolicy(AckPolicy.None)
                                       .deliverPolicy(deliverPolicy)
                                       .replayPolicy(ReplayPolicy.Instant)
                                       .build();
@@ -124,9 +123,9 @@ public class NatsUtils {
     return NatsMessage.builder().subject(subjectName).headers(headers).data(msg.value()).build();
   }
 
-  static MsgResult toMsgResult(Message message) {
+  static Msg toMsg(Message message) {
     String key = message.getHeaders().getFirst(ID_HEADER);
     var value = new String(message.getData(), StandardCharsets.UTF_8);
-    return new MsgResult(key, value, message::ack);
+    return new Msg(key, value);
   }
 }

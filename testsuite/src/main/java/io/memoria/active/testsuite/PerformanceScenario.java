@@ -1,5 +1,6 @@
 package io.memoria.active.testsuite;
 
+import io.memoria.atom.eventsourcing.ESException;
 import io.memoria.atom.eventsourcing.StateId;
 import io.memoria.atom.testsuite.eventsourcing.banking.command.AccountCommand;
 import io.memoria.atom.testsuite.eventsourcing.banking.event.AccountCreated;
@@ -58,17 +59,16 @@ public class PerformanceScenario implements PartitionScenario<AccountCommand, Ac
 
   @Override
   public boolean verify(StateId stateId) {
-    return pipeline.fetchEvents(stateId).get().map(PerformanceScenario::isTypeOf).forAll(b -> b);
+    return pipeline.fetchEvents(stateId).get().map(PerformanceScenario::validate).forAll(b -> b);
   }
 
-  private static boolean isTypeOf(AccountEvent acc) {
-    if (acc instanceof AccountCreated
-        || acc instanceof Debited
-        || acc instanceof Credited
-        || acc instanceof DebitConfirmed) {
-      return true;
-    } else {
-      throw new IllegalStateException("Unknown event %s".formatted(acc.getClass().getSimpleName()));
-    }
+  private static boolean validate(AccountEvent account) {
+    return switch (account) {
+      case AccountCreated acc -> acc.balance() == INITIAL_BALANCE;
+      case Debited acc -> acc.amount() == DEBIT_AMOUNT;
+      case Credited acc -> acc.amount() == DEBIT_AMOUNT;
+      case DebitConfirmed acc -> true;
+      default -> throw ESException.InvalidEvent.of(account);
+    };
   }
 }

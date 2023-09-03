@@ -2,7 +2,6 @@ package io.memoria.reactive.eventsourcing.stream;
 
 import io.memoria.active.core.stream.BlockingStream;
 import io.memoria.active.core.stream.Msg;
-import io.memoria.active.core.stream.MsgResult;
 import io.memoria.atom.core.text.TextTransformer;
 import io.memoria.atom.eventsourcing.Command;
 import io.vavr.collection.Stream;
@@ -23,7 +22,7 @@ public class CommandStream<C extends Command> {
     return toMsg(cmd).flatMap(msg -> stream.publish(topic, partition, msg)).map(str -> cmd);
   }
 
-  public Stream<Try<CommandResult<C>>> stream(String topic, int partition) {
+  public Stream<Try<C>> stream(String topic, int partition) {
     var result = stream.fetch(topic, partition).map(tr -> tr.map(this::toCmd));
     if (result.isSuccess()) {
       return result.get();
@@ -32,8 +31,8 @@ public class CommandStream<C extends Command> {
     }
   }
 
-  Try<CommandResult<C>> toCmd(MsgResult result) {
-    return transformer.deserialize(result.msg().value(), cClass).map(cmd -> new CommandResult<>(cmd, result::ack));
+  Try<C> toCmd(Msg msg) {
+    return transformer.deserialize(msg.value(), cClass);
   }
 
   Try<Msg> toMsg(C cmd) {

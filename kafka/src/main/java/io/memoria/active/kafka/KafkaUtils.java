@@ -1,7 +1,6 @@
 package io.memoria.active.kafka;
 
 import io.memoria.active.core.stream.Msg;
-import io.memoria.active.core.stream.MsgResult;
 import io.vavr.Function1;
 import io.vavr.collection.List;
 import io.vavr.collection.Map;
@@ -17,6 +16,12 @@ import java.time.Duration;
 public class KafkaUtils {
   private KafkaUtils() {}
 
+  public static Stream<ConsumerRecord<String, String>> consume(KafkaConsumer<String, String> consumer,
+                                                               TopicPartition tp,
+                                                               Duration timeout) {
+    return Stream.continually(() -> Stream.ofAll(consumer.poll(timeout).records(tp))).flatMap(Function1.identity());
+  }
+
   public static long topicSize(String topic, int partition, Map<String, Object> conf) {
     try (var consumer = new KafkaConsumer<String, String>(conf.toJavaMap())) {
       var tp = new TopicPartition(topic, partition);
@@ -25,12 +30,6 @@ public class KafkaUtils {
       consumer.seekToEnd(tpCol);
       return consumer.position(tp);
     }
-  }
-
-  public static Stream<ConsumerRecord<String, String>> consume(KafkaConsumer<String, String> consumer,
-                                                               TopicPartition tp,
-                                                               Duration timeout) {
-    return Stream.continually(() -> Stream.ofAll(consumer.poll(timeout).records(tp))).flatMap(Function1.identity());
   }
 
   public static Option<ConsumerRecord<String, String>> lastKey(String topic,
@@ -65,7 +64,4 @@ public class KafkaUtils {
     return new Msg(consumerRecord.key(), consumerRecord.value());
   }
 
-  public static MsgResult toMsgResult(Msg msg, Runnable ack) {
-    return new MsgResult(msg, ack);
-  }
 }
