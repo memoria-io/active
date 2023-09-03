@@ -1,9 +1,7 @@
 package io.memoria.reactive.eventsourcing.pipeline;
 
-import io.memoria.atom.core.caching.KCache;
 import io.memoria.atom.core.caching.KVCache;
 import io.memoria.atom.eventsourcing.Command;
-import io.memoria.atom.eventsourcing.CommandId;
 import io.memoria.atom.eventsourcing.Domain;
 import io.memoria.atom.eventsourcing.Event;
 import io.memoria.atom.eventsourcing.State;
@@ -17,7 +15,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.NoSuchElementException;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 public class PartitionPipeline<S extends State, C extends Command, E extends Event> {
   private static final Logger log = LoggerFactory.getLogger(PartitionPipeline.class.getName());
@@ -27,20 +24,17 @@ public class PartitionPipeline<S extends State, C extends Command, E extends Eve
   private final CommandRoute commandRoute;
   private final CommandStream<C> commandStream;
   private final KVCache<StateId, Aggregate<S, C, E>> aggMap;
-  private final Supplier<KCache<CommandId>> cacheSupplier;
 
   public PartitionPipeline(Domain<S, C, E> domain,
                            EventRepo<E> eventRepo,
                            CommandRoute commandRoute,
                            CommandStream<C> commandStream,
-                           KVCache<StateId, Aggregate<S, C, E>> aggMap,
-                           Supplier<KCache<CommandId>> commandIdCacheSupplier) {
+                           KVCache<StateId, Aggregate<S, C, E>> aggMap) {
     this.domain = domain;
     this.eventRepo = eventRepo;
     this.commandRoute = commandRoute;
     this.commandStream = commandStream;
     this.aggMap = aggMap;
-    this.cacheSupplier = commandIdCacheSupplier;
   }
 
   public Stream<Try<E>> handle() {
@@ -70,7 +64,7 @@ public class PartitionPipeline<S extends State, C extends Command, E extends Eve
    * @return initialized aggregate
    */
   Aggregate<S, C, E> initAggregate(StateId stateId) {
-    var aggregate = new Aggregate<>(stateId, domain, eventRepo, commandRoute, commandStream, cacheSupplier.get());
+    var aggregate = new Aggregate<>(stateId, domain, eventRepo, commandRoute, commandStream);
     aggregate.initialize().get().forEach(e -> log.info("Initializing with %s ".formatted(e.meta())));
     return aggregate;
   }
