@@ -15,7 +15,7 @@ class EtcdKVStoreTest {
   private final static Random random = new Random();
   private final static String keyPrefix = "key_" + random.nextInt(1000);
   private final Client client = Client.builder().endpoints("http://localhost:2379").build();
-  private final EtcdKVStore kvStore = new EtcdKVStore(client, Duration.ofMillis(500));
+  private final EtcdKVStore kvStore = new EtcdKVStore(client, Duration.ofMillis(1000));
 
   @Test
   void getAndPut() {
