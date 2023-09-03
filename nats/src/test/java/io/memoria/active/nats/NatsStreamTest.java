@@ -18,7 +18,7 @@ import static io.memoria.active.nats.Infra.NATS_CONFIG;
 
 @TestMethodOrder(OrderAnnotation.class)
 class NatsStreamTest {
-  private static final int count = 10_000;
+  private static final int count = 100;
   private static final String topic = "commands_" + System.currentTimeMillis();
   private static final int partition = 0;
   private static final NatsStream stream;

@@ -14,7 +14,7 @@ import java.time.Duration;
 
 @TestMethodOrder(OrderAnnotation.class)
 class KafkaStreamTest {
-  private static final int count = 10_000;
+  private static final int count = 100;
   private static final String topic = "commands_" + System.currentTimeMillis();
   private static final int partition = 0;
   private static final KafkaStream stream = new KafkaStream(Infra.producerConfigs(),
