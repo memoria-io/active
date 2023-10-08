@@ -17,7 +17,7 @@ services:
       - 2379:2379
       - 2380:2380
   kafka:
-    image: memoriaio/kafka-docker:20.0.0
+    image: memoriaio/kafka-docker:21.0.0
     ports:
       - "9092:9092"
       - "9093:9093"

@@ -1,4 +1,4 @@
-package io.memoria.active.testsuite;
+package io.memoria.reactive.testsuite;
 
 import io.memoria.atom.core.id.Id;
 import io.memoria.atom.eventsourcing.CommandId;
@@ -10,7 +10,7 @@ import io.memoria.atom.testsuite.eventsourcing.banking.command.CloseAccount;
 import io.memoria.atom.testsuite.eventsourcing.banking.command.CreateAccount;
 import io.memoria.atom.testsuite.eventsourcing.banking.command.Debit;
 import io.vavr.Tuple2;
-import io.vavr.collection.List;
+import io.vavr.collection.Stream;
 
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
@@ -42,19 +42,19 @@ public class Data {
     return Id.of(i);
   }
 
-  public List<Id> createIds(int from, int to) {
-    return List.range(from, to).map(this::createId);
+  public Stream<Id> createIds(int from, int to) {
+    return Stream.range(from, to).map(this::createId);
   }
 
   public CreateAccount createAccountCmd(StateId stateId, long balance) {
     return new CreateAccount(createCommandMeta(stateId), stateId.value(), balance);
   }
 
-  public List<AccountCommand> createAccountCmd(List<StateId> stateIds, long balance) {
+  public Stream<AccountCommand> createAccountCmd(Stream<StateId> stateIds, long balance) {
     return stateIds.map(id -> createAccountCmd(id, balance));
   }
 
-  public List<AccountCommand> changeNameCmd(List<StateId> stateIds, int version) {
+  public Stream<AccountCommand> changeNameCmd(Stream<StateId> stateIds, int version) {
     return stateIds.map(stateId -> new ChangeName(createCommandMeta(stateId), String.valueOf(version)));
   }
 
@@ -62,7 +62,7 @@ public class Data {
     return new Debit(createCommandMeta(debited), credited, amount);
   }
 
-  public List<AccountCommand> debitCmd(List<Tuple2<StateId, StateId>> debitedCredited, int amount) {
+  public Stream<AccountCommand> debitCmd(Stream<Tuple2<StateId, StateId>> debitedCredited, int amount) {
     return debitedCredited.map(entry -> debitCmd(entry._1(), entry._2(), amount));
   }
 
@@ -70,12 +70,11 @@ public class Data {
     return new CloseAccount(createCommandMeta(stateId));
   }
 
-  public List<AccountCommand> closeAccounts(List<StateId> stateIds) {
+  public Stream<AccountCommand> closeAccounts(Stream<StateId> stateIds) {
     return stateIds.map(this::closeAccountCmd);
   }
 
   private CommandMeta createCommandMeta(StateId stateId) {
     return new CommandMeta(CommandId.of(idSupplier.get()), stateId, timeSupplier.get());
   }
-
 }

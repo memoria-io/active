@@ -9,7 +9,6 @@ import io.memoria.atom.eventsourcing.StateId;
 import io.memoria.reactive.eventsourcing.repo.CommandPublisher;
 import io.memoria.reactive.eventsourcing.repo.EventRepo;
 import io.vavr.collection.Stream;
-import io.vavr.control.Option;
 import io.vavr.control.Try;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,10 +31,10 @@ public class AggregatePool<S extends State, C extends Command, E extends Event> 
     this.aggMap = aggMap;
   }
 
-  public Option<Try<E>> handle(C cmd) {
+  public Try<E> handle(C cmd) {
     var stateId = cmd.meta().stateId();
-    aggMap.putIfAbsent(stateId, k -> initAggregate(stateId));
-    return aggMap.get(stateId).get().handle(cmd);
+    aggMap.putIfAbsent(stateId, __ -> initAggregate(cmd.meta().stateId()));
+    return aggMap.get(stateId).toTry().flatMap(agg -> agg.handle(cmd));
   }
 
   public Try<Stream<E>> fetchEvents(StateId stateId) {
@@ -47,7 +46,9 @@ public class AggregatePool<S extends State, C extends Command, E extends Event> 
    */
   Aggregate<S, C, E> initAggregate(StateId stateId) {
     var aggregate = new Aggregate<>(stateId, domain, eventRepo, commandPublisher);
-    aggregate.initialize().get().forEach(e -> log.info("Initializing with %s ".formatted(e.meta())));
+    aggregate.initialize().forEach(events -> {
+      events.forEach(e -> log.info("Evolving with %s ".formatted(e.meta())));
+    });
     return aggregate;
   }
 }

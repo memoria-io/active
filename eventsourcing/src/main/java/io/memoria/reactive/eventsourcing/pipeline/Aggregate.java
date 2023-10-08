@@ -6,10 +6,10 @@ import io.memoria.atom.eventsourcing.Domain;
 import io.memoria.atom.eventsourcing.Event;
 import io.memoria.atom.eventsourcing.State;
 import io.memoria.atom.eventsourcing.StateId;
+import io.memoria.reactive.eventsourcing.exceptions.AlreadyHandledException;
 import io.memoria.reactive.eventsourcing.repo.CommandPublisher;
 import io.memoria.reactive.eventsourcing.repo.EventRepo;
 import io.vavr.collection.Stream;
-import io.vavr.control.Option;
 import io.vavr.control.Try;
 
 import java.util.HashSet;
@@ -39,12 +39,11 @@ public class Aggregate<S extends State, C extends Command, E extends Event> {
     this.processedCommands = new HashSet<>();
   }
 
-  public Option<Try<E>> handle(C cmd) {
+  public Try<E> handle(C cmd) {
     if (processedCommands.contains(cmd.meta().commandId())) {
-      return Option.none();
+      return Try.failure(AlreadyHandledException.of(cmd));
     } else {
-      var result = decide(cmd).peek(this::evolve).flatMap(this::saga).flatMap(this::publish);
-      return Option.some(result);
+      return decide(cmd).peek(this::evolve).flatMap(this::saga).flatMap(this::publish);
     }
   }
 
