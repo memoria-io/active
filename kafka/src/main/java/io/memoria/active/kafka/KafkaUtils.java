@@ -1,6 +1,6 @@
 package io.memoria.active.kafka;
 
-import io.memoria.active.core.stream.Msg;
+import io.memoria.atom.core.stream.Msg;
 import io.vavr.Function1;
 import io.vavr.collection.List;
 import io.vavr.collection.Map;

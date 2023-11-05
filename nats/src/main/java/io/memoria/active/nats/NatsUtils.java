@@ -1,6 +1,6 @@
 package io.memoria.active.nats;
 
-import io.memoria.active.core.stream.Msg;
+import io.memoria.atom.core.stream.Msg;
 import io.nats.client.Connection;
 import io.nats.client.ErrorListener;
 import io.nats.client.JetStream;

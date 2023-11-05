@@ -1,8 +1,8 @@
 package io.memoria.active.web;
 
-import io.helidon.common.http.Http.Method;
-import io.helidon.nima.webclient.http1.Http1Client;
-import io.helidon.nima.webserver.WebServer;
+import io.helidon.http.Method;
+import io.helidon.webclient.http1.Http1Client;
+import io.helidon.webserver.WebServer;
 import io.vavr.control.Try;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
