@@ -1,6 +1,6 @@
 package io.memoria.active.kafka;
 
-import io.memoria.active.core.stream.Msg;
+import io.memoria.atom.core.stream.Msg;
 import io.vavr.collection.Stream;
 import io.vavr.control.Try;
 import org.assertj.core.api.Assertions;

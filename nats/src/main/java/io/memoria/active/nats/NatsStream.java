@@ -1,7 +1,7 @@
 package io.memoria.active.nats;
 
-import io.memoria.active.core.stream.BlockingStream;
-import io.memoria.active.core.stream.Msg;
+import io.memoria.atom.core.stream.BlockingStream;
+import io.memoria.atom.core.stream.Msg;
 import io.nats.client.Connection;
 import io.nats.client.JetStream;
 import io.nats.client.JetStreamSubscription;

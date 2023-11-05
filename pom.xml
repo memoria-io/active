@@ -6,7 +6,7 @@
     <parent>
         <groupId>io.memoria</groupId>
         <artifactId>atom</artifactId>
-        <version>21.0.5</version>
+        <version>21.0.8</version>
     </parent>
 
     <!--suppress MavenRedundantGroupId -->
@@ -26,7 +26,6 @@
     <modules>
         <module>core</module>
         <module>cassandra</module>
-        <module>testsuite</module>
         <module>kafka</module>
         <module>nats</module>
         <module>etcd</module>
@@ -34,9 +33,9 @@
     </modules>
 
     <properties>
-        <atom.version>21.0.5</atom.version>
+        <atom.version>21.0.8</atom.version>
         <cassandra.version>4.15.0</cassandra.version>
-        <helidon.version>4.0.0-ALPHA6</helidon.version>
+        <helidon.version>4.0.0</helidon.version>
         <jsonwebtoken.version>0.11.5</jsonwebtoken.version>
         <sonar.coverage.exclusions>
             **/*Exception.java
@@ -138,23 +137,24 @@
             <!-- Netty Dependencies -->
             <!--======================================================================================== -->
             <dependency>
-                <groupId>io.helidon.nima.webserver</groupId>
-                <artifactId>helidon-nima-webserver</artifactId>
+                <groupId>io.helidon.webserver</groupId>
+                <artifactId>helidon-webserver</artifactId>
                 <version>${helidon.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.helidon.nima.http2</groupId>
-                <artifactId>helidon-nima-http2-webserver</artifactId>
+                <groupId>io.helidon.webserver</groupId>
+                <artifactId>helidon-webserver-http2</artifactId>
+                <version>${helidon.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.helidon.webclient</groupId>
+                <artifactId>helidon-webclient</artifactId>
                 <version>${helidon.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.helidon.nima.webclient</groupId>
-                <artifactId>helidon-nima-webclient</artifactId>
-                <version>${helidon.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.helidon.nima.testing.junit5</groupId>
-                <artifactId>helidon-nima-testing-junit5-webserver</artifactId>
+                <groupId>io.helidon.webserver.testing.junit5</groupId>
+                <artifactId>helidon-webserver-testing-junit5</artifactId>
                 <version>${helidon.version}</version>
                 <scope>test</scope>
             </dependency>

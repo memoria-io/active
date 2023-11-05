@@ -28,25 +28,24 @@
         </dependency>
 
         <!--======================================================================================== -->
-        <!-- Netty Dependencies -->
+        <!-- Helidon Dependencies -->
         <!--======================================================================================== -->
         <dependency>
-            <groupId>io.helidon.nima.webserver</groupId>
-            <artifactId>helidon-nima-webserver</artifactId>
+            <groupId>io.helidon.webserver</groupId>
+            <artifactId>helidon-webserver</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.helidon.nima.http2</groupId>
-            <artifactId>helidon-nima-http2-webserver</artifactId>
+            <groupId>io.helidon.webserver</groupId>
+            <artifactId>helidon-webserver-http2</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.helidon.nima.webclient</groupId>
-            <artifactId>helidon-nima-webclient</artifactId>
+            <groupId>io.helidon.webclient</groupId>
+            <artifactId>helidon-webclient</artifactId>
         </dependency>
-        <!--        <dependency>-->
-        <!--            <groupId>io.helidon.nima.testing.junit5</groupId>-->
-        <!--            <artifactId>helidon-nima-testing-junit5-webserver</artifactId>-->
-        <!--            <scope>test</scope>-->
-        <!--        </dependency>-->
+        <dependency>
+            <groupId>io.helidon.webserver.testing.junit5</groupId>
+            <artifactId>helidon-webserver-testing-junit5</artifactId>
+        </dependency>
     </dependencies>
 </project>
 
