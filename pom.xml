@@ -26,7 +26,6 @@
     <modules>
         <module>core</module>
         <module>cassandra</module>
-        <module>eventsourcing</module>
         <module>testsuite</module>
         <module>kafka</module>
         <module>nats</module>
@@ -78,11 +77,6 @@
             <dependency>
                 <groupId>io.memoria.atom</groupId>
                 <artifactId>core</artifactId>
-                <version>${atom.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.memoria.atom</groupId>
-                <artifactId>eventsourcing</artifactId>
                 <version>${atom.version}</version>
             </dependency>
             <dependency>
