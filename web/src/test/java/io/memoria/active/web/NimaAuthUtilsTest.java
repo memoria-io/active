@@ -1,6 +1,6 @@
 package io.memoria.active.web;
 
-class NimaAuthUtilsIT {
+class NimaAuthUtilsTest {
   // basic and token only separated for simplicity, in production it should be one path
   private static final String basicAuthPath = "/authenticate_basic";
   private static final String tokenAuthPath = "/authenticate_token";
