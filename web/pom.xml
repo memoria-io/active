@@ -6,11 +6,11 @@
     <parent>
         <groupId>io.memoria</groupId>
         <artifactId>active</artifactId>
-        <version>21.0.1</version>
+        <version>21.0.2</version>
     </parent>
     <groupId>io.memoria.active</groupId>
     <artifactId>web</artifactId>
-    <version>21.0.1</version>
+    <version>21.0.2</version>
     <packaging>jar</packaging>
     <name>${project.groupId}.${project.artifactId}</name>
     <description>Web Module</description>
@@ -28,7 +28,7 @@
         </dependency>
 
         <!--======================================================================================== -->
-        <!-- Helidon Dependencies -->
+        <!-- Netty Dependencies -->
         <!--======================================================================================== -->
         <dependency>
             <groupId>io.helidon.webserver</groupId>
@@ -42,16 +42,16 @@
             <groupId>io.helidon.webclient</groupId>
             <artifactId>helidon-webclient</artifactId>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>io.helidon.webserver.testing.junit5</groupId>-->
-<!--            <artifactId>helidon-webserver-testing-junit5</artifactId>-->
-<!--            <scope>test</scope>-->
-<!--        </dependency>-->
-<!--        <dependency>-->
-<!--            <groupId>io.helidon.webserver.testing.junit5</groupId>-->
-<!--            <artifactId>helidon-webserver-testing-junit5-http2</artifactId>-->
-<!--            <scope>test</scope>-->
-<!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>io.helidon.webserver.testing.junit5</groupId>-->
+        <!--            <artifactId>helidon-webserver-testing-junit5</artifactId>-->
+        <!--            <scope>test</scope>-->
+        <!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>io.helidon.webserver.testing.junit5</groupId>-->
+        <!--            <artifactId>helidon-webserver-testing-junit5-http2</artifactId>-->
+        <!--            <scope>test</scope>-->
+        <!--        </dependency>-->
     </dependencies>
 </project>
 

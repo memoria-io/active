@@ -19,12 +19,10 @@ import io.nats.client.api.StreamInfo;
 import io.nats.client.impl.Headers;
 import io.nats.client.impl.NatsMessage;
 import io.vavr.collection.List;
-import io.vavr.control.Option;
 import io.vavr.control.Try;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.time.Duration;
 
 /**
  * Utility class for directly using nats, this layer is for testing NATS java driver, and ideally it shouldn't have
@@ -74,11 +72,6 @@ public class NatsUtils {
     return Try.of(() -> js.subscribe(subjectName, subscribeOptions));
   }
 
-  static List<Message> fetchMessages(JetStreamSubscription sub, int fetchBatchSize, Duration fetchMaxWait) {
-    var msgs = sub.fetch(fetchBatchSize, fetchMaxWait);
-    return List.ofAll(msgs).dropWhile(Message::isStatusMessage);
-  }
-
   static StreamConfiguration streamConfiguration(NatsConfig natsConfig, String topic, int partition) {
     return StreamConfiguration.builder()
                               .replicas(natsConfig.replicas())
@@ -88,10 +81,6 @@ public class NatsUtils {
                               .name(streamName(topic, partition))
                               .subjects(subjectName(topic, partition))
                               .build();
-  }
-
-  public static Option<Message> fetchLastMessage(JetStreamSubscription sub, NatsConfig config) {
-    return List.ofAll(sub.fetch(config.fetchBatchSize(), config.fetchMaxWait())).lastOption();
   }
 
   static StreamInfo createOrUpdateStream(Connection nc, StreamConfiguration streamConfiguration)
