@@ -16,7 +16,7 @@ import java.util.Objects;
 import java.util.stream.StreamSupport;
 
 @TestMethodOrder(value = OrderAnnotation.class)
-class CassandraUtilsTest {
+class CassandraUtilsIT {
   private static final String KEYSPACE = "eventsourcing";
   private static final String TABLE = "events" + System.currentTimeMillis();
   private static final String AGG_ID = "aggId";

@@ -1,7 +1,6 @@
-package io.memoria.active.nats;
+package io.memoria.active.kafka;
 
 import io.memoria.atom.core.stream.Msg;
-import io.nats.client.JetStreamApiException;
 import io.vavr.collection.Stream;
 import io.vavr.control.Try;
 import org.assertj.core.api.Assertions;
@@ -11,27 +10,17 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 
-import java.io.IOException;
 import java.time.Duration;
 
-import static io.memoria.active.nats.Infra.NATS_CONFIG;
-
 @TestMethodOrder(OrderAnnotation.class)
-class NatsStreamTest {
+class KafkaStreamIT {
   private static final int count = 100;
   private static final String topic = "commands_" + System.currentTimeMillis();
   private static final int partition = 0;
-  private static final NatsStream stream;
+  private static final KafkaStream stream = new KafkaStream(Infra.producerConfigs(),
+                                                            Infra.consumerConfigs(),
+                                                            Duration.ofMillis(1000));
   private static boolean await = false;
-
-  static {
-    try {
-      stream = new NatsStream(NATS_CONFIG, Duration.ofMillis(500));
-      NatsUtils.createOrUpdateTopic(NATS_CONFIG, topic, 1);
-    } catch (IOException | InterruptedException | JetStreamApiException e) {
-      throw new RuntimeException(e);
-    }
-  }
 
   @Test
   @Order(0)

@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Base64;
 import java.util.NoSuchElementException;
 
-class HttpUtilsTest {
+class HttpUtilsIT {
 
   @Test
   void basicSuccess() {

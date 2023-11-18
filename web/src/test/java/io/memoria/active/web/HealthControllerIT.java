@@ -14,7 +14,7 @@ import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class HealthControllerTest {
+class HealthControllerIT {
   private static final String ERROR_MSG = "The flip was false!";
   private static final String endpoint = "/health";
   private static final String host = "localhost";
