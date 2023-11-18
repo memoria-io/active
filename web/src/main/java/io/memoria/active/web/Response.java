@@ -1,6 +1,6 @@
 package io.memoria.active.web;
 
-import io.helidon.common.http.Http.Status;
+import io.helidon.http.Status;
 
 public interface Response {
   String payload();

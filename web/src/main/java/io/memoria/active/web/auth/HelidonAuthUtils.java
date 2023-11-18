@@ -1,11 +1,11 @@
 package io.memoria.active.web.auth;
 
-import io.helidon.nima.webserver.http.ServerRequest;
+import io.helidon.webserver.http.ServerRequest;
 import io.memoria.active.web.HttpUtils;
 import io.vavr.control.Option;
 import io.vavr.control.Try;
 
-import static io.helidon.common.http.Http.Header.AUTHORIZATION;
+import static io.helidon.http.HeaderNames.AUTHORIZATION;
 
 public class HelidonAuthUtils {
 
