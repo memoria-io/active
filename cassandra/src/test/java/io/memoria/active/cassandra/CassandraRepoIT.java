@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 
 @TestMethodOrder(OrderAnnotation.class)
-class CassandraRepoTest {
+class CassandraRepoIT {
   private static final String KEYSPACE = "eventsourcing";
   private static final String TABLE = "events2" + System.currentTimeMillis();
   private static final String AGG_ID = "aggId";
