@@ -12,8 +12,6 @@ import java.net.URI;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 class HealthControllerTest {
   private static final String ERROR_MSG = "The flip was false!";
   private static final String endpoint = "/health";
