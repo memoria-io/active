@@ -1,8 +1,8 @@
 package io.memoria.active.web;
 
-import io.helidon.http.Method;
-import io.helidon.webclient.http1.Http1Client;
-import io.helidon.webserver.WebServer;
+import io.helidon.common.http.Http.Method;
+import io.helidon.nima.webclient.http1.Http1Client;
+import io.helidon.nima.webserver.WebServer;
 import io.vavr.control.Try;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -11,6 +11,8 @@ import org.junit.jupiter.api.Test;
 import java.net.URI;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 class HealthControllerTest {
   private static final String ERROR_MSG = "The flip was false!";
