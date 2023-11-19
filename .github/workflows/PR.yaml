@@ -27,7 +27,7 @@ jobs:
         run: docker-compose up -d
 
       - name: Sleeping
-        run: sleep 30
+        run: sleep 45
 
       - name: Sonar
         env:

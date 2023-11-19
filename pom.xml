@@ -12,7 +12,7 @@
     <!--suppress MavenRedundantGroupId -->
     <groupId>io.memoria</groupId>
     <artifactId>active</artifactId>
-    <version>21.0.2</version>
+    <version>21.1.0</version>
     <packaging>pom</packaging>
 
     <name>${project.groupId}.${project.artifactId}</name>
@@ -26,8 +26,6 @@
     <modules>
         <module>core</module>
         <module>cassandra</module>
-        <module>kafka</module>
-        <module>nats</module>
         <module>etcd</module>
         <module>web</module>
     </modules>
@@ -86,11 +84,6 @@
             <dependency>
                 <groupId>io.memoria.atom</groupId>
                 <artifactId>text</artifactId>
-                <version>${atom.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.memoria.atom</groupId>
-                <artifactId>testsuite</artifactId>
                 <version>${atom.version}</version>
             </dependency>
             <!-- ===============================================================   -->
