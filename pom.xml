@@ -6,7 +6,7 @@
     <parent>
         <groupId>io.memoria</groupId>
         <artifactId>atom</artifactId>
-        <version>21.2.0</version>
+        <version>21.4.0</version>
     </parent>
 
     <!--suppress MavenRedundantGroupId -->
