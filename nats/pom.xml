@@ -9,27 +9,33 @@
         <version>21.4.0</version>
     </parent>
     <groupId>io.memoria.active</groupId>
-    <artifactId>cassandra</artifactId>
+    <artifactId>nats</artifactId>
     <version>21.4.0</version>
     <packaging>jar</packaging>
     <name>${project.groupId}.${project.artifactId}</name>
-    <description>ETCD Module</description>
+    <description>Nats Module</description>
     <dependencies>
+        <!--======================================================================================== -->
+        <!-- Module Dependencies -->
+        <!--======================================================================================== -->
         <dependency>
             <groupId>io.memoria.active</groupId>
             <artifactId>core</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
         <!--======================================================================================== -->
-        <!-- Cassandra Dependencies -->
+        <!-- Nats Dependencies -->
         <!--======================================================================================== -->
         <dependency>
-            <groupId>com.datastax.oss</groupId>
-            <artifactId>java-driver-core</artifactId>
+            <groupId>io.nats</groupId>
+            <artifactId>jnats</artifactId>
         </dependency>
+        <!--======================================================================================== -->
+        <!-- Kafka Dependencies -->
+        <!--======================================================================================== -->
         <dependency>
-            <groupId>com.datastax.oss</groupId>
-            <artifactId>java-driver-query-builder</artifactId>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>kafka-clients</artifactId>
         </dependency>
     </dependencies>
 </project>

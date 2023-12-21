@@ -9,23 +9,26 @@
         <version>21.4.0</version>
     </parent>
     <groupId>io.memoria.active</groupId>
-    <artifactId>etcd</artifactId>
+    <artifactId>kafka</artifactId>
     <version>21.4.0</version>
     <packaging>jar</packaging>
     <name>${project.groupId}.${project.artifactId}</name>
-    <description>ETCD Module</description>
+    <description>Kafka Module</description>
     <dependencies>
+        <!--======================================================================================== -->
+        <!-- Module Dependencies -->
+        <!--======================================================================================== -->
         <dependency>
             <groupId>io.memoria.active</groupId>
             <artifactId>core</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
-        <!-- ===============================================================   -->
-        <!-- etcd Dependencies                                                 -->
-        <!-- ===============================================================   -->
+        <!--======================================================================================== -->
+        <!-- Kafka Dependencies -->
+        <!--======================================================================================== -->
         <dependency>
-            <groupId>io.etcd</groupId>
-            <artifactId>jetcd-core</artifactId>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>kafka-clients</artifactId>
         </dependency>
     </dependencies>
 </project>
