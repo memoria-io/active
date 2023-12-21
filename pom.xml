@@ -5,8 +5,8 @@
 
     <parent>
         <groupId>io.memoria</groupId>
-        <artifactId>jbom</artifactId>
-        <version>21.3.0</version>
+        <artifactId>atom</artifactId>
+        <version>21.5.0</version>
     </parent>
 
     <!--suppress MavenRedundantGroupId -->
@@ -33,7 +33,7 @@
     </modules>
 
     <properties>
-        <atom.version>21.4.0</atom.version>
+        <atom.version>21.5.0</atom.version>
         <cassandra.version>4.15.0</cassandra.version>
         <helidon.version>4.0.0</helidon.version>
         <jsonwebtoken.version>0.11.5</jsonwebtoken.version>
