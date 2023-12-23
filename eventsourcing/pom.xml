@@ -9,11 +9,11 @@
         <version>21.6.0</version>
     </parent>
     <groupId>io.memoria.active</groupId>
-    <artifactId>nats</artifactId>
+    <artifactId>eventsourcing</artifactId>
     <version>21.6.0</version>
     <packaging>jar</packaging>
     <name>${project.groupId}.${project.artifactId}</name>
-    <description>Nats Module</description>
+    <description>Event sourcing Module</description>
     <dependencies>
         <!--======================================================================================== -->
         <!-- Module Dependencies -->
@@ -24,19 +24,20 @@
             <version>${project.parent.version}</version>
         </dependency>
         <!--======================================================================================== -->
-        <!-- Nats Dependencies -->
+        <!-- Atom Dependencies -->
         <!--======================================================================================== -->
         <dependency>
-            <groupId>io.nats</groupId>
-            <artifactId>jnats</artifactId>
+            <groupId>io.memoria.atom</groupId>
+            <artifactId>eventsourcing</artifactId>
         </dependency>
-        <!--======================================================================================== -->
-        <!-- Kafka Dependencies -->
-        <!--======================================================================================== -->
         <dependency>
-            <groupId>org.apache.kafka</groupId>
-            <artifactId>kafka-clients</artifactId>
+            <groupId>io.memoria.atom</groupId>
+            <artifactId>actor</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.memoria.atom</groupId>
+            <artifactId>testsuite</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 </project>
-

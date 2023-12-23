@@ -5,7 +5,7 @@ import com.datastax.oss.driver.api.core.cql.SimpleStatement;
 import com.datastax.oss.driver.api.core.metadata.schema.ClusteringOrder;
 import com.datastax.oss.driver.api.querybuilder.QueryBuilder;
 import com.datastax.oss.driver.api.querybuilder.SchemaBuilder;
-import io.memoria.active.core.repo.seq.SeqRow;
+import io.memoria.active.core.repo.stack.StackItem;
 
 import java.util.Objects;
 
@@ -22,8 +22,8 @@ class CassandraUtils {
   public static SimpleStatement createEventsTable(String keyspace, String table) {
     return SchemaBuilder.createTable(keyspace, table)
                         .ifNotExists()
-                        .withPartitionKey(CassandraRow.stateIdCol, CassandraRow.stateIdColType)
-                        .withClusteringColumn(CassandraRow.seqCol, CassandraRow.seqColType)
+                        .withPartitionKey(CassandraRow.partitionKeyCol, CassandraRow.partitionKeyColType)
+                        .withClusteringColumn(CassandraRow.clusterKeyCol, CassandraRow.clusterKeyColType)
                         .withColumn(CassandraRow.payloadCol, CassandraRow.payloadColType)
                         .withColumn(CassandraRow.createdAtCol, CassandraRow.createAtColType)
                         .build();
@@ -35,20 +35,20 @@ class CassandraUtils {
 
   public static SimpleStatement push(String keyspace, String table, CassandraRow row) {
     return QueryBuilder.insertInto(keyspace, table)
-                       .value(CassandraRow.stateIdCol, literal(row.stateId()))
-                       .value(CassandraRow.seqCol, literal(row.seqId()))
+                       .value(CassandraRow.partitionKeyCol, literal(row.stateId()))
+                       .value(CassandraRow.clusterKeyCol, literal(row.seqId()))
                        .value(CassandraRow.payloadCol, literal(row.payload()))
                        .value(CassandraRow.createdAtCol, literal(row.createdAt()))
                        .ifNotExists()
                        .build();
   }
 
-  public static SimpleStatement get(String keyspace, String table, String stateId, int startIdx) {
+  public static SimpleStatement get(String keyspace, String table, String partitionKey, int startIdx) {
     return QueryBuilder.selectFrom(keyspace, table)
                        .all()
-                       .whereColumn(CassandraRow.stateIdCol)
-                       .isEqualTo(literal(stateId))
-                       .whereColumn(CassandraRow.seqCol)
+                       .whereColumn(CassandraRow.partitionKeyCol)
+                       .isEqualTo(literal(partitionKey))
+                       .whereColumn(CassandraRow.clusterKeyCol)
                        .isGreaterThanOrEqualTo(literal(startIdx))
                        .build();
   }
@@ -56,9 +56,9 @@ class CassandraUtils {
   public static SimpleStatement getFirst(String keyspace, String table, String stateId) {
     return QueryBuilder.selectFrom(keyspace, table)
                        .all()
-                       .whereColumn(CassandraRow.stateIdCol)
+                       .whereColumn(CassandraRow.partitionKeyCol)
                        .isEqualTo(literal(stateId))
-                       .whereColumn(CassandraRow.seqCol)
+                       .whereColumn(CassandraRow.clusterKeyCol)
                        .isEqualTo(literal(0))
                        .build();
   }
@@ -66,32 +66,32 @@ class CassandraUtils {
   public static SimpleStatement getLast(String keyspace, String table, String stateId) {
     return QueryBuilder.selectFrom(keyspace, table)
                        .all()
-                       .whereColumn(CassandraRow.stateIdCol)
+                       .whereColumn(CassandraRow.partitionKeyCol)
                        .isEqualTo(literal(stateId))
-                       .whereColumn(CassandraRow.seqCol)
+                       .whereColumn(CassandraRow.clusterKeyCol)
                        .isGreaterThanOrEqualTo(literal(0))
-                       .orderBy(CassandraRow.seqCol, ClusteringOrder.DESC)
+                       .orderBy(CassandraRow.clusterKeyCol, ClusteringOrder.DESC)
                        .limit(1)
                        .build();
   }
 
-  public static SimpleStatement size(String keyspace, String table, String stateId) {
+  public static SimpleStatement size(String keyspace, String table, String partitionKey) {
     return QueryBuilder.selectFrom(keyspace, table)
                        .countAll()
-                       .whereColumn(CassandraRow.stateIdCol)
-                       .isEqualTo(literal(stateId))
+                       .whereColumn(CassandraRow.partitionKeyCol)
+                       .isEqualTo(literal(partitionKey))
                        .build();
   }
 
   public static CassandraRow toCassandraRow(Row row) {
-    var rStateId = Objects.requireNonNull(row.getString(CassandraRow.stateIdCol));
-    var rSeqId = row.getInt(CassandraRow.seqCol);
+    var rStateId = Objects.requireNonNull(row.getString(CassandraRow.partitionKeyCol));
+    var rSeqId = row.getInt(CassandraRow.clusterKeyCol);
     var rCreatedAt = row.getLong(CassandraRow.createdAtCol);
     var rEvent = Objects.requireNonNull(row.getString(CassandraRow.payloadCol));
     return new CassandraRow(rStateId, rSeqId, rEvent, rCreatedAt);
   }
 
-  public static SeqRow toSeqRow(CassandraRow r) {
-    return new SeqRow(r.stateId(), r.seqId(), r.payload());
+  public static StackItem toSeqRow(CassandraRow r) {
+    return new StackItem(r.stateId(), r.seqId(), r.payload());
   }
 }

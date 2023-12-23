@@ -1,6 +1,6 @@
 package io.memoria.active.cassandra;
 
-import io.memoria.active.core.repo.seq.SeqRow;
+import io.memoria.active.core.repo.stack.StackItem;
 
 public class FailedAppend extends IllegalArgumentException {
   private static final String MSG = "Event with SeqId:%s append operation wasn't applied in "
@@ -14,7 +14,7 @@ public class FailedAppend extends IllegalArgumentException {
     return new FailedAppend(keyspace, table, stateId, seqId);
   }
 
-  public static FailedAppend of(String keyspace, String table, SeqRow esRow) {
-    return FailedAppend.of(keyspace, table, esRow.aggId(), esRow.seqId());
+  public static FailedAppend of(String keyspace, String table, StackItem esRow) {
+    return FailedAppend.of(keyspace, table, esRow.stackId(), esRow.index());
   }
 }

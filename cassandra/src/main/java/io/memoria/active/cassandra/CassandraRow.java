@@ -7,12 +7,12 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
 record CassandraRow(String stateId, int seqId, String payload, long createdAt) {
-  // StateId
-  static final String stateIdCol = "state_id";
-  static final DataType stateIdColType = DataTypes.TEXT;
-  // SeqId
-  static final String seqCol = "seq_id";
-  static final DataType seqColType = DataTypes.INT;
+  // partition key (e.g stateId)
+  static final String partitionKeyCol = "partition_key_col";
+  static final DataType partitionKeyColType = DataTypes.TEXT;
+  // cluster key (e.g index)
+  static final String clusterKeyCol = "cluster_key_col";
+  static final DataType clusterKeyColType = DataTypes.INT;
   // Value
   static final String payloadCol = "payload";
   static final DataType payloadColType = DataTypes.TEXT;
@@ -25,7 +25,7 @@ record CassandraRow(String stateId, int seqId, String payload, long createdAt) {
       throw new IllegalArgumentException("Seq can't be less than zero!.");
   }
 
-  public CassandraRow(String stateId, int seq, String event) {
-    this(stateId, seq, event, LocalDateTime.now().toEpochSecond(ZoneOffset.UTC));
+  public CassandraRow(String partitionKey, int seq, String payload) {
+    this(partitionKey, seq, payload, LocalDateTime.now().toEpochSecond(ZoneOffset.UTC));
   }
 }
