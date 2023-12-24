@@ -1,5 +1,6 @@
 package io.memoria.active.core.stream;
 
+import io.vavr.control.Try;
 import org.assertj.core.api.Assertions;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.DisplayName;
@@ -22,7 +23,7 @@ class BlockingChainTest {
     });
 
     AtomicInteger idx = new AtomicInteger(0);
-    stream.fetch().get().take(1).forEach(i -> {
+    stream.fetch().take(1).map(Try::get).forEach(i -> {
       Assertions.assertThat(i).isEqualTo(idx.getAndIncrement());
     });
   }
@@ -37,7 +38,7 @@ class BlockingChainTest {
     });
 
     AtomicInteger idx = new AtomicInteger(0);
-    stream.fetch().get().take(count).forEach(i -> {
+    stream.fetch().take(count).map(Try::get).forEach(i -> {
       Assertions.assertThat(i).isEqualTo(idx.getAndIncrement());
     });
   }
@@ -54,6 +55,6 @@ class BlockingChainTest {
         throw new RuntimeException(e);
       }
     });
-    Awaitility.await().timeout(Duration.ofMillis(250)).until(() -> stream.fetch().get().take(2).length() == 2);
+    Awaitility.await().timeout(Duration.ofMillis(250)).until(() -> stream.fetch().take(2).length() == 2);
   }
 }

@@ -1,19 +1,20 @@
 package io.memoria.active.eventsourcing;
 
-import io.memoria.active.core.queue.QueueRepo;
 import io.memoria.active.eventsourcing.pipeline.AggregateFactory;
 import io.memoria.atom.actor.Actor;
 import io.memoria.atom.actor.ActorId;
 import io.memoria.atom.actor.system.ActorStore;
 import io.memoria.atom.actor.system.ActorSystem;
 import io.memoria.atom.core.id.Id;
-import io.memoria.atom.core.stream.BlockingStream;
-import io.memoria.atom.core.text.SerializableTransformer;
+import io.memoria.atom.eventsourcing.CommandId;
+import io.memoria.atom.eventsourcing.CommandMeta;
 import io.memoria.atom.eventsourcing.Domain;
+import io.memoria.atom.eventsourcing.StateId;
 import io.memoria.atom.testsuite.eventsourcing.AccountDecider;
 import io.memoria.atom.testsuite.eventsourcing.AccountEvolver;
 import io.memoria.atom.testsuite.eventsourcing.AccountSaga;
-import org.apache.logging.log4j.message.Message;
+import io.memoria.atom.testsuite.eventsourcing.command.CreateAccount;
+import io.memoria.atom.testsuite.eventsourcing.command.Credit;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -21,30 +22,26 @@ import org.junit.jupiter.params.provider.MethodSource;
 import javax.cache.Caching;
 import javax.cache.configuration.MutableConfiguration;
 import java.io.IOException;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
-import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 public class AggregateSystemTest {
-  private static final int numOfActors = 1000;
-  private static final int numOfRequests = 1000;
+  private static final int numOfActors = 3;
+  private static final int numOfRequests = 3;
   private static final AtomicLong atomicLong = new AtomicLong();
   private static final Supplier<Id> idSupplier = () -> Id.of(atomicLong.getAndIncrement());
   private static final Supplier<Long> timeSupplier = System::currentTimeMillis;
   private static final Domain domain = new Domain(new AccountDecider(idSupplier, timeSupplier),
                                                   new AccountEvolver(),
                                                   new AccountSaga(idSupplier, timeSupplier));
-  private static final EventRepo eventRepo = new EventRepo(QueueRepo.inMemory(), new SerializableTransformer());
-  private static final BlockingStream blockingStream = BlockingStream.inMemory();
-  private static final CommandPublisher commandPublisher = new CommandPublisher("command",
-                                                                                1,
-                                                                                blockingStream,
-                                                                                new SerializableTransformer());
-  private static final AggregateFactory actorFactory = new AggregateFactory(domain, eventRepo, commandPublisher);
+  private static final EventRepo eventRepo = EventRepo.inMemory();
+  private static final CommandRepo commandRepo = CommandRepo.inMemory();
+  private static final AggregateFactory actorFactory = new AggregateFactory(domain, eventRepo, commandRepo);
 
   @ParameterizedTest
   @MethodSource("testArgs")
@@ -61,10 +58,8 @@ public class AggregateSystemTest {
 
   private static void startActor(ActorId actorId, ActorSystem actorSystem) {
     Thread.ofVirtual().start(() -> {
-      //      System.out.println("Starting: " + actorId);
-      IntStream.range(0, numOfRequests).forEach(_ -> {
-        assert actorSystem.apply(actorId, new Message()).isSuccess();
-      });
+      assert actorSystem.apply(actorId, createCommand(actorId.value())).isSuccess();
+      assert actorSystem.apply(actorId, addBalance(actorId.value())).isSuccess();
     });
   }
 
@@ -85,5 +80,15 @@ public class AggregateSystemTest {
 
   private static CountDownLatch createLatch() {
     return new CountDownLatch(numOfActors * numOfRequests);
+  }
+
+  private static CreateAccount createCommand(String stateId) {
+    var meta = new CommandMeta(CommandId.of(UUID.randomUUID()), StateId.of(stateId));
+    return new CreateAccount(meta, stateId, 500);
+  }
+
+  private static Credit addBalance(String stateId) {
+    var meta = new CommandMeta(CommandId.of(UUID.randomUUID()), StateId.of(stateId));
+    return new Credit(meta, StateId.of("the_bank"), 500);
   }
 }

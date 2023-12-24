@@ -1,6 +1,6 @@
 package io.memoria.active.eventsourcing.pipeline;
 
-import io.memoria.active.eventsourcing.CommandPublisher;
+import io.memoria.active.eventsourcing.CommandRepo;
 import io.memoria.active.eventsourcing.EventRepo;
 import io.memoria.active.eventsourcing.exceptions.AlreadyHandledException;
 import io.memoria.atom.actor.Actor;
@@ -28,17 +28,17 @@ public class Aggregate implements Actor {
   private final AtomicReference<State> state;
   private final AtomicInteger eventSeqId;
   private final EventRepo eventRepo;
-  private final CommandPublisher commandPublisher;
+  private final CommandRepo commandRepo;
   private final Set<CommandId> processedCommands;
 
-  public Aggregate(StateId stateId, Domain domain, EventRepo eventRepo, CommandPublisher commandPublisher) {
+  public Aggregate(StateId stateId, Domain domain, EventRepo eventRepo, CommandRepo commandRepo) {
     this.actorId = new ActorId(stateId);
     this.stateId = stateId;
     this.domain = domain;
     this.state = new AtomicReference<>();
     this.eventSeqId = new AtomicInteger();
     this.eventRepo = eventRepo;
-    this.commandPublisher = commandPublisher;
+    this.commandRepo = commandRepo;
     this.processedCommands = new HashSet<>();
   }
 
@@ -69,7 +69,7 @@ public class Aggregate implements Actor {
   }
 
   Try<Event> publish(Event event) {
-    return eventRepo.append(event, eventSeqId.get());
+    return eventRepo.append(event);
   }
 
   Try<Event> decide(Command cmd) {
@@ -96,6 +96,6 @@ public class Aggregate implements Actor {
   }
 
   Try<Event> saga(Event e) {
-    return domain.saga().apply(e).map(commandPublisher::publish).map(tr -> tr.map(_ -> e)).getOrElse(Try.success(e));
+    return domain.saga().apply(e).map(commandRepo::publish).map(tr -> tr.map(_ -> e)).getOrElse(Try.success(e));
   }
 }
