@@ -6,7 +6,7 @@
     <parent>
         <groupId>io.memoria</groupId>
         <artifactId>atom</artifactId>
-        <version>21.13.0</version>
+        <version>21.15.0</version>
     </parent>
 
     <!--suppress MavenRedundantGroupId -->
@@ -34,7 +34,7 @@
     </modules>
 
     <properties>
-        <atom.version>21.13.0</atom.version>
+        <atom.version>21.15.0</atom.version>
         <cassandra.version>4.15.0</cassandra.version>
         <helidon.version>4.0.0</helidon.version>
         <jsonwebtoken.version>0.11.5</jsonwebtoken.version>
