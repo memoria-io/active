@@ -6,7 +6,7 @@ import com.datastax.oss.driver.api.core.type.DataTypes;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
-record CassandraRow(String stateId, int seqId, String payload, long createdAt) {
+record CassandraRow(String stackId, int itemIndex, String payload, long createdAt) {
   // partition key (e.g stateId)
   static final String partitionKeyCol = "partition_key_col";
   static final DataType partitionKeyColType = DataTypes.TEXT;
@@ -21,7 +21,7 @@ record CassandraRow(String stateId, int seqId, String payload, long createdAt) {
   static final DataType createAtColType = DataTypes.BIGINT;
 
   public CassandraRow {
-    if (seqId < 0)
+    if (itemIndex < 0)
       throw new IllegalArgumentException("Seq can't be less than zero!.");
   }
 

@@ -17,7 +17,7 @@
     <dependencies>
         <dependency>
             <groupId>io.memoria.active</groupId>
-            <artifactId>core</artifactId>
+            <artifactId>eventsourcing</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
         <!--======================================================================================== -->

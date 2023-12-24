@@ -15,12 +15,12 @@ public class CassandraAdmin {
   }
 
   public boolean createKeyspace(String keyspace, int replicationFactor) {
-    var st = CassandraUtils.createEventsKeyspace(keyspace, replicationFactor);
+    var st = CassandraUtils.createKeyspace(keyspace, replicationFactor);
     return session.execute(st).wasApplied();
   }
 
   public boolean createTopicTable(String keyspace, String topic) {
-    var st = CassandraUtils.createEventsTable(keyspace, topic);
+    var st = CassandraUtils.createStacksTable(keyspace, topic);
     return session.execute(st).wasApplied();
   }
 }

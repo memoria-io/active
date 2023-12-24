@@ -32,12 +32,12 @@ class CassandraUtilsIT {
     assert version != null && !version.isEmpty();
 
     // Create namespace
-    var st = CassandraUtils.createEventsKeyspace(KEYSPACE, 1);
+    var st = CassandraUtils.createKeyspace(KEYSPACE, 1);
     var keyspaceCreated = session.execute(st).wasApplied();
     assert keyspaceCreated;
 
     // Create table
-    var tableCreated = session.execute(CassandraUtils.createEventsTable(KEYSPACE, TABLE)).wasApplied();
+    var tableCreated = session.execute(CassandraUtils.createStacksTable(KEYSPACE, TABLE)).wasApplied();
     assert tableCreated;
   }
 
@@ -77,7 +77,7 @@ class CassandraUtilsIT {
     // When
     var lastSeq = session.execute(CassandraUtils.getLast(KEYSPACE, TABLE, AGG_ID))
                          .map(CassandraUtils::toCassandraRow)
-                         .map(CassandraRow::seqId)
+                         .map(CassandraRow::itemIndex)
                          .one();
     // Then
     Assertions.assertThat(lastSeq).isEqualTo(COUNT - 1);

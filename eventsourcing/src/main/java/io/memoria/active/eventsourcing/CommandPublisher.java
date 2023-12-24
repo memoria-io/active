@@ -4,5 +4,5 @@ import io.memoria.atom.eventsourcing.Command;
 import io.vavr.control.Try;
 
 public interface CommandPublisher {
-  Try<Command> publish(Command cmd);
+  Try<Command> publish(Command command);
 }

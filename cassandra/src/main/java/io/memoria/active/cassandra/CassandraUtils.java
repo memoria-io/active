@@ -5,7 +5,8 @@ import com.datastax.oss.driver.api.core.cql.SimpleStatement;
 import com.datastax.oss.driver.api.core.metadata.schema.ClusteringOrder;
 import com.datastax.oss.driver.api.querybuilder.QueryBuilder;
 import com.datastax.oss.driver.api.querybuilder.SchemaBuilder;
-import io.memoria.active.core.repo.stack.StackItem;
+import io.memoria.active.core.queue.QueueId;
+import io.memoria.active.core.queue.QueueItem;
 
 import java.util.Objects;
 
@@ -15,11 +16,11 @@ class CassandraUtils {
 
   private CassandraUtils() {}
 
-  public static SimpleStatement createEventsKeyspace(String keyspace, int replication) {
+  public static SimpleStatement createKeyspace(String keyspace, int replication) {
     return SchemaBuilder.createKeyspace(keyspace).ifNotExists().withSimpleStrategy(replication).build();
   }
 
-  public static SimpleStatement createEventsTable(String keyspace, String table) {
+  public static SimpleStatement createStacksTable(String keyspace, String table) {
     return SchemaBuilder.createTable(keyspace, table)
                         .ifNotExists()
                         .withPartitionKey(CassandraRow.partitionKeyCol, CassandraRow.partitionKeyColType)
@@ -35,8 +36,8 @@ class CassandraUtils {
 
   public static SimpleStatement push(String keyspace, String table, CassandraRow row) {
     return QueryBuilder.insertInto(keyspace, table)
-                       .value(CassandraRow.partitionKeyCol, literal(row.stateId()))
-                       .value(CassandraRow.clusterKeyCol, literal(row.seqId()))
+                       .value(CassandraRow.partitionKeyCol, literal(row.stackId()))
+                       .value(CassandraRow.clusterKeyCol, literal(row.itemIndex()))
                        .value(CassandraRow.payloadCol, literal(row.payload()))
                        .value(CassandraRow.createdAtCol, literal(row.createdAt()))
                        .ifNotExists()
@@ -91,7 +92,7 @@ class CassandraUtils {
     return new CassandraRow(rStateId, rSeqId, rEvent, rCreatedAt);
   }
 
-  public static StackItem toSeqRow(CassandraRow r) {
-    return new StackItem(r.stateId(), r.seqId(), r.payload());
+  public static QueueItem toSeqRow(CassandraRow r) {
+    return new QueueItem(new QueueId(r.stackId()), r.itemIndex(), r.payload());
   }
 }

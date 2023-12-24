@@ -20,7 +20,7 @@
         <!--======================================================================================== -->
         <dependency>
             <groupId>io.memoria.atom</groupId>
-            <artifactId>sec</artifactId>
+            <artifactId>security</artifactId>
         </dependency>
         <dependency>
             <groupId>io.memoria.atom</groupId>
