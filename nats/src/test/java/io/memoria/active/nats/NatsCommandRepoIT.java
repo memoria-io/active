@@ -1,11 +1,13 @@
-package io.memoria.active.kafka;
+package io.memoria.active.nats;
 
+import io.memoria.active.eventsourcing.CommandRepo;
 import io.memoria.atom.core.text.SerializableTransformer;
 import io.memoria.atom.eventsourcing.CommandId;
 import io.memoria.atom.eventsourcing.CommandMeta;
 import io.memoria.atom.eventsourcing.StateId;
 import io.memoria.atom.testsuite.eventsourcing.command.CreateAccount;
 import io.memoria.atom.testsuite.eventsourcing.command.Credit;
+import io.nats.client.JetStreamApiException;
 import io.vavr.collection.Stream;
 import io.vavr.control.Try;
 import org.assertj.core.api.Assertions;
@@ -15,29 +17,37 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 
+import java.io.IOException;
 import java.time.Duration;
 import java.util.UUID;
 
 @TestMethodOrder(OrderAnnotation.class)
-class KafkaCommandRepoIT {
-  private static final int count = 10000;
+class NatsCommandRepoIT {
+  private static final String NATS_URL = "nats://localhost:4222";
   private static final String topic = "commands_" + System.currentTimeMillis();
-  private static final KafkaCommandRepo stream = new KafkaCommandRepo(Infra.producerConfigs(),
-                                                                      Infra.consumerConfigs(),
-                                                                      Duration.ofMillis(5000),
-                                                                      topic,
-                                                                      1,
-                                                                      new SerializableTransformer());
+  private static final int totalPartitions = 1;
+  private static final int count = 100;
+  private static final CommandRepo stream;
+
+  static {
+    try {
+      var nc = NatsUtils.createConnection(NATS_URL);
+      stream = new NatsCommandRepo(nc, topic, totalPartitions, new SerializableTransformer());
+      NatsUtils.createOrUpdateStream(nc.jetStreamManagement(), NatsUtils.defaultCommandStreamConfig(topic, 1).build());
+    } catch (IOException | InterruptedException | JetStreamApiException e) {
+      throw new RuntimeException(e);
+    }
+  }
 
   @Test
   @Order(0)
   void publishing() {
     var await = Stream.range(0, count)
-                  .map(String::valueOf)
-                  .map(KafkaCommandRepoIT::createCommand)
-                  .map(stream::publish)
-                  .map(Try::isSuccess)
-                  .forAll(b -> b);
+                      .map(String::valueOf)
+                      .map(NatsCommandRepoIT::createCommand)
+                      .map(stream::publish)
+                      .map(Try::isSuccess)
+                      .forAll(b -> b);
     Awaitility.await().timeout(Duration.ofSeconds(10)).until(() -> await);
   }
 

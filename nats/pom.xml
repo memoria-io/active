@@ -20,8 +20,13 @@
         <!--======================================================================================== -->
         <dependency>
             <groupId>io.memoria.active</groupId>
-            <artifactId>core</artifactId>
+            <artifactId>eventsourcing</artifactId>
             <version>${project.parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.memoria.atom</groupId>
+            <artifactId>testsuite</artifactId>
+            <scope>test</scope>
         </dependency>
         <!--======================================================================================== -->
         <!-- Nats Dependencies -->
@@ -29,13 +34,6 @@
         <dependency>
             <groupId>io.nats</groupId>
             <artifactId>jnats</artifactId>
-        </dependency>
-        <!--======================================================================================== -->
-        <!-- Kafka Dependencies -->
-        <!--======================================================================================== -->
-        <dependency>
-            <groupId>org.apache.kafka</groupId>
-            <artifactId>kafka-clients</artifactId>
         </dependency>
     </dependencies>
 </project>
