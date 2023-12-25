@@ -1,6 +1,5 @@
 package io.memoria.active.kafka;
 
-import io.memoria.active.core.stream.Msg;
 import io.vavr.Function1;
 import io.vavr.collection.List;
 import io.vavr.collection.Map;
@@ -8,7 +7,6 @@ import io.vavr.collection.Stream;
 import io.vavr.control.Option;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.TopicPartition;
 
 import java.time.Duration;
@@ -16,11 +14,7 @@ import java.time.Duration;
 public class KafkaUtils {
   private KafkaUtils() {}
 
-  public static Stream<ConsumerRecord<String, String>> consume(KafkaConsumer<String, String> consumer,
-                                                               TopicPartition tp,
-                                                               Duration timeout) {
-    return Stream.continually(() -> Stream.ofAll(consumer.poll(timeout).records(tp))).flatMap(Function1.identity());
-  }
+
 
   public static long topicSize(String topic, int partition, Map<String, Object> conf) {
     try (var consumer = new KafkaConsumer<String, String>(conf.toJavaMap())) {
@@ -54,14 +48,6 @@ public class KafkaUtils {
         return Option.none();
       }
     }
-  }
-
-  public static ProducerRecord<String, String> toRecord(String topic, int partition, Msg msg) {
-    return new ProducerRecord<>(topic, partition, msg.key(), msg.value());
-  }
-
-  public static Msg toMsg(ConsumerRecord<String, String> consumerRecord) {
-    return new Msg(consumerRecord.key(), consumerRecord.value());
   }
 
 }
