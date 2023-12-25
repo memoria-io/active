@@ -42,8 +42,8 @@ public class Aggregate implements Actor {
     this.processedCommands = new HashSet<>();
   }
 
-  public Try<List<Event>> initialize() {
-    return eventRepo.fetch(stateId).map(eTry -> eTry.map(this::evolve));
+  public List<Try<Event>> initialize() {
+    return eventRepo.fetch(stateId).map(ev -> ev.map(this::evolve));
   }
 
   public Try<Event> handle(Command cmd) {

@@ -52,13 +52,8 @@ public class CassandraEventRepo implements EventRepo {
   }
 
   @Override
-  public Try<List<Event>> fetch(StateId stateId) {
-    return Try.of(() -> fetchEvents(stateId.value()));
-  }
-
-  @Override
-  public Try<Stream<Event>> stream(StateId stateId) {
-    return Try.of(() -> streamEvents(stateId.value()));
+  public List<Try<Event>> fetch(StateId stateId) {
+    return fetchEvents(stateId.value());
   }
 
   @Override
@@ -81,10 +76,10 @@ public class CassandraEventRepo implements EventRepo {
     }
   }
 
-  private List<Event> fetchEvents(String partitionKey) {
+  private List<Try<Event>> fetchEvents(String partitionKey) {
     var st = EventStatements.fetchAll(keyspace, table, partitionKey, 0);
     var result = session.execute(st);
-    return List.ofAll(result.all()).map(this::toEvent).map(Try::get);
+    return List.ofAll(result.all()).map(this::toEvent);
   }
 
   private Stream<Event> streamEvents(String partitionKey) {

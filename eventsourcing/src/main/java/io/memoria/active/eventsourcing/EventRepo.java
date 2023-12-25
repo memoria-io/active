@@ -9,7 +9,7 @@ public interface EventRepo {
 
   Try<Event> append(Event event);
 
-  Try<List<Event>> fetch(StateId stateId);
+  List<Try<Event>> fetch(StateId stateId);
 
   Try<Long> size(StateId stateId);
 

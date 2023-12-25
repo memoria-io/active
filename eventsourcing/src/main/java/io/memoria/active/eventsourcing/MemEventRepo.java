@@ -3,7 +3,6 @@ package io.memoria.active.eventsourcing;
 import io.memoria.atom.eventsourcing.Event;
 import io.memoria.atom.eventsourcing.StateId;
 import io.vavr.collection.List;
-import io.vavr.collection.Stream;
 import io.vavr.control.Option;
 import io.vavr.control.Try;
 
@@ -33,14 +32,12 @@ class MemEventRepo implements EventRepo {
   }
 
   @Override
-  public Try<List<Event>> fetch(StateId stateId) {
-    var list = Option.of(map.get(stateId)).map(List::ofAll).getOrElse(List.of());
-    return Try.success(list);
+  public List<Try<Event>> fetch(StateId stateId) {
+    return Option.of(map.get(stateId)).map(List::ofAll).getOrElse(List.of()).map(Try::success);
   }
 
   @Override
   public Try<Long> size(StateId stateId) {
-    var size = (long) Option.of(map.get(stateId)).map(java.util.List::size).getOrElse(0);
-    return Try.success(size);
+    return Try.success((long) fetch(stateId).size());
   }
 }

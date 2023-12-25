@@ -1,7 +1,7 @@
 package io.memoria.active.kafka;
 
+import io.memoria.active.core.stream.Msg;
 import io.memoria.atom.core.stream.BlockingStreamPublisher;
-import io.memoria.atom.core.stream.Msg;
 import io.memoria.atom.core.text.TextTransformer;
 import io.memoria.atom.eventsourcing.Command;
 import io.vavr.control.Try;
