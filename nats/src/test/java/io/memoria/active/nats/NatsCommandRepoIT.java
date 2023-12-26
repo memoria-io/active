@@ -7,10 +7,10 @@ import io.memoria.atom.eventsourcing.CommandMeta;
 import io.memoria.atom.eventsourcing.StateId;
 import io.memoria.atom.testsuite.eventsourcing.command.CreateAccount;
 import io.memoria.atom.testsuite.eventsourcing.command.Credit;
+import io.nats.client.Connection;
 import io.nats.client.JetStreamApiException;
 import io.vavr.collection.Stream;
 import io.vavr.control.Try;
-import org.assertj.core.api.Assertions;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Order;
@@ -20,20 +20,22 @@ import org.junit.jupiter.api.TestMethodOrder;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
 
 @TestMethodOrder(OrderAnnotation.class)
 class NatsCommandRepoIT {
   private static final String NATS_URL = "nats://localhost:4222";
   private static final String topic = "commands_" + System.currentTimeMillis();
   private static final int totalPartitions = 1;
-  private static final int count = 100;
+  private static final int count = 1000;
+  private static final Connection nc;
   private static final CommandRepo stream;
 
   static {
     try {
-      var nc = NatsUtils.createConnection(NATS_URL);
+      nc = NatsUtils.createConnection(NATS_URL);
       stream = new NatsCommandRepo(nc, topic, totalPartitions, new SerializableTransformer());
-      NatsUtils.createOrUpdateStream(nc.jetStreamManagement(), NatsUtils.defaultCommandStreamConfig(topic, 1).build());
+      NatsUtils.createOrUpdateStream(nc.jetStreamManagement(), topic, 1);
     } catch (IOException | InterruptedException | JetStreamApiException e) {
       throw new RuntimeException(e);
     }
@@ -41,7 +43,9 @@ class NatsCommandRepoIT {
 
   @Test
   @Order(0)
-  void publishing() {
+  void publishing() throws IOException, JetStreamApiException {
+    var names = nc.jetStreamManagement().getStreamNames();
+    System.out.println(names);
     var await = Stream.range(0, count)
                       .map(String::valueOf)
                       .map(NatsCommandRepoIT::createCommand)
@@ -53,9 +57,18 @@ class NatsCommandRepoIT {
 
   @Test
   @Order(1)
-  void stream() {
-    var size = stream.stream().peek(System.out::println).take(count).size();
-    Assertions.assertThat(size).isEqualTo(count);
+  void stream() throws InterruptedException {
+    var latch = new CountDownLatch(count);
+    Thread.startVirtualThread(() -> stream.stream().forEach(m -> {
+      //      System.out.println("First: " + m);
+      latch.countDown();
+    }));
+
+    Thread.startVirtualThread(() -> stream.stream().forEach(m -> {
+      //      System.out.println("Second: " + m);
+      latch.countDown();
+    }));
+    latch.await();
   }
 
   private static CreateAccount createCommand(String stateId) {

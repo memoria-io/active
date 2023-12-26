@@ -6,6 +6,11 @@ import io.nats.client.JetStreamApiException;
 import io.nats.client.JetStreamManagement;
 import io.nats.client.Nats;
 import io.nats.client.Options;
+import io.nats.client.api.AckPolicy;
+import io.nats.client.api.ConsumerConfiguration;
+import io.nats.client.api.ConsumerConfiguration.Builder;
+import io.nats.client.api.DeliverPolicy;
+import io.nats.client.api.ReplayPolicy;
 import io.nats.client.api.RetentionPolicy;
 import io.nats.client.api.StorageType;
 import io.nats.client.api.StreamConfiguration;
@@ -23,6 +28,11 @@ public class NatsUtils {
 
   public static Connection createConnection(String url) throws IOException, InterruptedException {
     return Nats.connect(Options.builder().server(url).errorListener(errorListener()).build());
+  }
+
+  public static StreamInfo createOrUpdateStream(JetStreamManagement jsManagement, String topic, int replication)
+          throws JetStreamApiException, IOException {
+    return createOrUpdateStream(jsManagement, defaultCommandStreamConfig(topic, replication).build());
   }
 
   public static StreamInfo createOrUpdateStream(JetStreamManagement jsManagement,
@@ -46,12 +56,24 @@ public class NatsUtils {
                               .denyPurge(false);
   }
 
+  public static Builder defaultCommandConsumerConfigs(String name) {
+    return ConsumerConfiguration.builder()
+                                .name(name)
+                                .ackPolicy(AckPolicy.Explicit)
+                                .deliverPolicy(DeliverPolicy.All)
+                                .replayPolicy(ReplayPolicy.Instant);
+  }
+
   public static String toPartitionedSubjectName(String topic) {
     return topic + ".*";
   }
 
   public static String toPartitionedSubjectName(String topic, int partition) {
     return topic + "." + partition;
+  }
+
+  public static String toSubscriptionName(String topic) {
+    return "%s_%d_subscription".formatted(topic, System.currentTimeMillis());
   }
 
   private static ErrorListener errorListener() {

@@ -10,10 +10,7 @@ import io.nats.client.JetStreamSubscription;
 import io.nats.client.Message;
 import io.nats.client.PublishOptions;
 import io.nats.client.PullSubscribeOptions;
-import io.nats.client.api.AckPolicy;
 import io.nats.client.api.ConsumerConfiguration;
-import io.nats.client.api.DeliverPolicy;
-import io.nats.client.api.ReplayPolicy;
 import io.nats.client.impl.NatsMessage;
 import io.vavr.collection.List;
 import io.vavr.collection.Stream;
@@ -26,10 +23,14 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
+import static io.memoria.active.nats.NatsUtils.toPartitionedSubjectName;
+import static io.memoria.active.nats.NatsUtils.toSubscriptionName;
+
 public class NatsCommandRepo implements CommandRepo {
   private static final Logger log = LoggerFactory.getLogger(NatsCommandRepo.class.getName());
 
   private final JetStream jetStream;
+  private final PullSubscribeOptions subscribeOptions;
   private final String topic;
   private final String subjectName;
   private final int totalPartitions;
@@ -42,12 +43,23 @@ public class NatsCommandRepo implements CommandRepo {
   // SerDes
   private final TextTransformer transformer;
 
+  /**
+   * Constructor with default settings
+   */
   public NatsCommandRepo(Connection connection, String topic, int totalPartitions, TextTransformer transformer)
           throws IOException {
-    this(connection, topic, totalPartitions, Duration.ofMillis(1000), 100, Duration.ofMillis(100), transformer);
+    this(connection,
+         NatsUtils.defaultCommandConsumerConfigs(toSubscriptionName(topic)).build(),
+         topic,
+         totalPartitions,
+         Duration.ofMillis(1000),
+         100,
+         Duration.ofMillis(100),
+         transformer);
   }
 
   public NatsCommandRepo(Connection connection,
+                         ConsumerConfiguration consumerConfig,
                          String topic,
                          int totalPartitions,
                          Duration pollTimeout,
@@ -55,8 +67,9 @@ public class NatsCommandRepo implements CommandRepo {
                          Duration fetchMaxWait,
                          TextTransformer transformer) throws IOException {
     this.jetStream = connection.jetStream();
+    this.subscribeOptions = PullSubscribeOptions.builder().stream(topic).configuration(consumerConfig).build();
     this.topic = topic;
-    this.subjectName = NatsUtils.toPartitionedSubjectName(topic);
+    this.subjectName = toPartitionedSubjectName(topic);
     this.totalPartitions = totalPartitions;
     this.pollTimeout = pollTimeout;
     this.fetchBatchSize = fetchBatchSize;
@@ -74,7 +87,10 @@ public class NatsCommandRepo implements CommandRepo {
 
   @Override
   public Stream<Try<Command>> stream() {
-    return Try.of(this::createSubscription).getOrElseGet(t -> Stream.of(Try.failure(t)));
+    return Try.of(this::createSubscription).getOrElseGet(t -> {
+      log.error("Error while Creating subscription", t);
+      return Stream.of(Try.failure(t));
+    });
   }
 
   private List<Message> fetchMessages(JetStreamSubscription sub, int fetchBatchSize, Duration fetchMaxWait) {
@@ -84,7 +100,7 @@ public class NatsCommandRepo implements CommandRepo {
 
   private Try<NatsMessage> natsMessage(Command command) {
     var partition = command.partition(totalPartitions);
-    var subject = NatsUtils.toPartitionedSubjectName(topic, partition);
+    var subject = toPartitionedSubjectName(topic, partition);
     return transformer.serialize(command).map(payload -> NatsMessage.builder().subject(subject).data(payload).build());
   }
 
@@ -94,15 +110,10 @@ public class NatsCommandRepo implements CommandRepo {
   }
 
   private Stream<Try<Command>> createSubscription() throws JetStreamApiException, IOException {
-    var config = ConsumerConfiguration.builder()
-                                      .ackPolicy(AckPolicy.None)
-                                      .deliverPolicy(DeliverPolicy.All)
-                                      .replayPolicy(ReplayPolicy.Instant)
-                                      .build();
-    var subscribeOptions = PullSubscribeOptions.builder().stream(topic).configuration(config).build();
     var sub = this.jetStream.subscribe(subjectName, subscribeOptions);
     return Stream.continually(() -> fetchMessages(sub, fetchBatchSize, fetchMaxWait))
                  .flatMap(Stream::ofAll)
+                 .peek(Message::ack)
                  .map(this::toCommand);
   }
 }
