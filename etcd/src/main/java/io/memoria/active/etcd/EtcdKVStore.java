@@ -3,7 +3,7 @@ package io.memoria.active.etcd;
 import io.etcd.jetcd.ByteSequence;
 import io.etcd.jetcd.Client;
 import io.etcd.jetcd.KV;
-import io.memoria.active.core.repo.kv.KVStore;
+import io.memoria.active.core.kv.KVStore;
 import io.vavr.control.Option;
 import io.vavr.control.Try;
 

@@ -9,28 +9,41 @@
         <version>21.6.0</version>
     </parent>
     <groupId>io.memoria.active</groupId>
-    <artifactId>cassandra</artifactId>
+    <artifactId>eventsourcing</artifactId>
     <version>21.6.0</version>
     <packaging>jar</packaging>
     <name>${project.groupId}.${project.artifactId}</name>
-    <description>ETCD Module</description>
+    <description>Event sourcing Module</description>
     <dependencies>
+        <!--======================================================================================== -->
+        <!-- Module Dependencies -->
+        <!--======================================================================================== -->
         <dependency>
             <groupId>io.memoria.active</groupId>
-            <artifactId>eventsourcing</artifactId>
+            <artifactId>core</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
         <!--======================================================================================== -->
-        <!-- Cassandra Dependencies -->
+        <!-- Atom Dependencies -->
         <!--======================================================================================== -->
         <dependency>
-            <groupId>com.datastax.oss</groupId>
-            <artifactId>java-driver-core</artifactId>
+            <groupId>io.memoria.atom</groupId>
+            <artifactId>eventsourcing</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.datastax.oss</groupId>
-            <artifactId>java-driver-query-builder</artifactId>
+            <groupId>io.memoria.atom</groupId>
+            <artifactId>actor</artifactId>
         </dependency>
+        <dependency>
+            <groupId>io.memoria.atom</groupId>
+            <artifactId>testsuite</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.ehcache</groupId>
+            <artifactId>ehcache</artifactId>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 </project>
-
