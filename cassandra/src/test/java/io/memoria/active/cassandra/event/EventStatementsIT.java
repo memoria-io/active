@@ -3,7 +3,6 @@ package io.memoria.active.cassandra.event;
 import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.cql.ResultSet;
 import com.datastax.oss.driver.api.core.cql.Row;
-import com.datastax.oss.driver.api.core.type.reflect.GenericType;
 import io.memoria.active.cassandra.CassandraUtils;
 import io.memoria.active.cassandra.Infra;
 import io.vavr.collection.List;
@@ -79,7 +78,7 @@ class EventStatementsIT {
   void getLast() {
     // When
     var lastSeq = session.execute(EventStatements.getLast(KEYSPACE, TABLE, PARTITION_KEY))
-                         .map(row -> row.getInt(EventStatements.clusterKeyCol))
+                         .map(row -> row.getInt(EventStatements.CLUSTER_KEY_COL))
                          .one();
     // Then
     Assertions.assertThat(lastSeq).isEqualTo(COUNT - 1);

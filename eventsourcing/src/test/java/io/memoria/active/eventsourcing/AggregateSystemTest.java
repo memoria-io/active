@@ -30,7 +30,7 @@ import java.util.function.Supplier;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-public class AggregateSystemTest {
+class AggregateSystemTest {
   private static final int numOfActors = 10;
   private static final AtomicLong atomicLong = new AtomicLong();
   private static final Supplier<Id> idSupplier = () -> Id.of(atomicLong.getAndIncrement());

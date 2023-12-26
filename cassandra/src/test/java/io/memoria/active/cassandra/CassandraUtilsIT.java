@@ -3,6 +3,8 @@ package io.memoria.active.cassandra;
 import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.cql.ResultSet;
 import com.datastax.oss.driver.api.core.cql.Row;
+import com.datastax.oss.driver.api.querybuilder.SchemaBuilder;
+import io.memoria.active.cassandra.event.EventStatements;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Order;
@@ -30,13 +32,19 @@ class CassandraUtilsIT {
   void createKeyspace() {
     // Create table
     var st = CassandraUtils.createKeyspace(KEYSPACE, 1);
-    var keyspaceCreated = session.execute(st).wasApplied();
-    assert keyspaceCreated;
+    assert session.execute(st).wasApplied();
   }
 
   @Test
   @Order(1)
   void truncateTable() {
-
+    String tableName = "SOME_TABLE";
+    var creationSt = SchemaBuilder.createTable(KEYSPACE, tableName)
+                                  .ifNotExists()
+                                  .withPartitionKey("PARTITION_KEY_COL", EventStatements.PARTITION_KEY_COL_TYPE)
+                                  .build();
+    assert session.execute(creationSt).wasApplied();
+    var truncateSt = CassandraUtils.truncate(KEYSPACE, tableName);
+    assert session.execute(truncateSt).wasApplied();
   }
 }

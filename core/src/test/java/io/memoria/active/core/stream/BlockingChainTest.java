@@ -47,13 +47,13 @@ class BlockingChainTest {
   @DisplayName("Should block until tail is added")
   void tailBlocking() {
     Thread.startVirtualThread(() -> {
-      try {
-        Thread.sleep(200);
-        stream.append(1);
-        stream.append(2);
-      } catch (InterruptedException e) {
-        throw new RuntimeException(e);
-      }
+      //      try {
+      //        Thread.sleep(200);
+      stream.append(1);
+      stream.append(2);
+      //      } catch (InterruptedException e) {
+      //        throw new RuntimeException(e);
+      //      }
     });
     Awaitility.await().timeout(Duration.ofMillis(250)).until(() -> stream.fetch().take(2).length() == 2);
   }

@@ -22,6 +22,8 @@ import java.time.Duration;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+
 @TestMethodOrder(OrderAnnotation.class)
 class NatsCommandRepoIT {
   private static final String NATS_URL = "nats://localhost:4222";
@@ -68,7 +70,7 @@ class NatsCommandRepoIT {
       //      System.out.println("Second: " + m);
       latch.countDown();
     }));
-    latch.await();
+    assert latch.await(500, MILLISECONDS);
   }
 
   private static CreateAccount createCommand(String stateId) {

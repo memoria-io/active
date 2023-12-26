@@ -82,7 +82,7 @@ public class CassandraEventRepo implements EventRepo {
   }
 
   private Try<Event> toEvent(Row row) {
-    var payload = Objects.requireNonNull(row.getString(EventStatements.payloadCol));
+    var payload = Objects.requireNonNull(row.getString(EventStatements.PAYLOAD_COL));
     return transformer.deserialize(payload, Event.class);
   }
 }

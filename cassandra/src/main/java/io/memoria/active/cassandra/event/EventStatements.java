@@ -14,25 +14,25 @@ import static com.datastax.oss.driver.api.querybuilder.QueryBuilder.literal;
 
 public class EventStatements {
   // partition key (e.g stateId)
-  public static final String partitionKeyCol = "partition_key_col";
-  public static final DataType partitionKeyColType = DataTypes.TEXT;
+  public static final String PARTITION_KEY_COL = "partition_key_col";
+  public static final DataType PARTITION_KEY_COL_TYPE = DataTypes.TEXT;
   // cluster key (e.g event version)
-  public static final String clusterKeyCol = "cluster_key_col";
-  public static final DataType clusterKeyColType = DataTypes.INT;
+  public static final String CLUSTER_KEY_COL = "cluster_key_col";
+  public static final DataType CLUSTER_KEY_COL_TYPE = DataTypes.INT;
   // Payload
-  public static final String payloadCol = "payload";
-  public static final DataType payloadColType = DataTypes.TEXT;
+  public static final String PAYLOAD_COL = "payload";
+  public static final DataType PAYLOAD_COL_TYPE = DataTypes.TEXT;
   // CreatedAt
-  public static final String createdAtCol = "created_at";
-  public static final DataType createAtColType = DataTypes.BIGINT;
+  public static final String CREATED_AT_COL = "created_at";
+  public static final DataType CREATE_AT_COL_TYPE = DataTypes.BIGINT;
 
   public static SimpleStatement createTable(String keyspace, String table) {
     return SchemaBuilder.createTable(keyspace, table)
                         .ifNotExists()
-                        .withPartitionKey(partitionKeyCol, partitionKeyColType)
-                        .withClusteringColumn(clusterKeyCol, clusterKeyColType)
-                        .withColumn(payloadCol, payloadColType)
-                        .withColumn(createdAtCol, createAtColType)
+                        .withPartitionKey(PARTITION_KEY_COL, PARTITION_KEY_COL_TYPE)
+                        .withClusteringColumn(CLUSTER_KEY_COL, CLUSTER_KEY_COL_TYPE)
+                        .withColumn(PAYLOAD_COL, PAYLOAD_COL_TYPE)
+                        .withColumn(CREATED_AT_COL, CREATE_AT_COL_TYPE)
                         .build();
   }
 
@@ -43,10 +43,10 @@ public class EventStatements {
                                      String payload) {
     long createdAt = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC);
     return QueryBuilder.insertInto(keyspace, table)
-                       .value(partitionKeyCol, literal(partitionKey))
-                       .value(clusterKeyCol, literal(clusterKey))
-                       .value(payloadCol, literal(payload))
-                       .value(createdAtCol, literal(createdAt))
+                       .value(PARTITION_KEY_COL, literal(partitionKey))
+                       .value(CLUSTER_KEY_COL, literal(clusterKey))
+                       .value(PAYLOAD_COL, literal(payload))
+                       .value(CREATED_AT_COL, literal(createdAt))
                        .ifNotExists()
                        .build();
   }
@@ -54,9 +54,9 @@ public class EventStatements {
   public static SimpleStatement fetchAll(String keyspace, String table, String partitionKey, int startIdx) {
     return QueryBuilder.selectFrom(keyspace, table)
                        .all()
-                       .whereColumn(partitionKeyCol)
+                       .whereColumn(PARTITION_KEY_COL)
                        .isEqualTo(literal(partitionKey))
-                       .whereColumn(clusterKeyCol)
+                       .whereColumn(CLUSTER_KEY_COL)
                        .isGreaterThanOrEqualTo(literal(startIdx))
                        .build();
   }
@@ -64,9 +64,9 @@ public class EventStatements {
   public static SimpleStatement getFirst(String keyspace, String table, String partitionKey) {
     return QueryBuilder.selectFrom(keyspace, table)
                        .all()
-                       .whereColumn(partitionKeyCol)
+                       .whereColumn(PARTITION_KEY_COL)
                        .isEqualTo(literal(partitionKey))
-                       .whereColumn(clusterKeyCol)
+                       .whereColumn(CLUSTER_KEY_COL)
                        .isEqualTo(literal(0))
                        .build();
   }
@@ -74,11 +74,11 @@ public class EventStatements {
   public static SimpleStatement getLast(String keyspace, String table, String partitionKey) {
     return QueryBuilder.selectFrom(keyspace, table)
                        .all()
-                       .whereColumn(partitionKeyCol)
+                       .whereColumn(PARTITION_KEY_COL)
                        .isEqualTo(literal(partitionKey))
-                       .whereColumn(clusterKeyCol)
+                       .whereColumn(CLUSTER_KEY_COL)
                        .isGreaterThanOrEqualTo(literal(0))
-                       .orderBy(clusterKeyCol, ClusteringOrder.DESC)
+                       .orderBy(CLUSTER_KEY_COL, ClusteringOrder.DESC)
                        .limit(1)
                        .build();
   }
@@ -86,8 +86,10 @@ public class EventStatements {
   public static SimpleStatement size(String keyspace, String table, String partitionKey) {
     return QueryBuilder.selectFrom(keyspace, table)
                        .countAll()
-                       .whereColumn(partitionKeyCol)
+                       .whereColumn(PARTITION_KEY_COL)
                        .isEqualTo(literal(partitionKey))
                        .build();
   }
+
+  private EventStatements() {}
 }

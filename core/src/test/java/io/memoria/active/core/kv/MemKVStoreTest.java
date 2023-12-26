@@ -20,7 +20,7 @@ class MemKVStoreTest {
 
     // Then
     var expectedValues = List.range(0, count).map(MemKVStoreTest::toValue).toJavaList();
-    assertThat(setKV.size()).isEqualTo(count);
+    assertThat(setKV).hasSize(count);
     assertThat(getKV).hasSameElementsAs(expectedValues);
   }
 
