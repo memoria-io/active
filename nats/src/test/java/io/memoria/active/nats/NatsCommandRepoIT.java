@@ -36,6 +36,8 @@ class NatsCommandRepoIT {
       nc = NatsUtils.createConnection(NATS_URL);
       stream = new NatsCommandRepo(nc, topic, totalPartitions, new SerializableTransformer());
       NatsUtils.createOrUpdateStream(nc.jetStreamManagement(), topic, 1);
+      //    var names = nc.jetStreamManagement().getStreamNames();
+      //    System.out.println(names);
     } catch (IOException | InterruptedException | JetStreamApiException e) {
       throw new RuntimeException(e);
     }
@@ -43,9 +45,7 @@ class NatsCommandRepoIT {
 
   @Test
   @Order(0)
-  void publishing() throws IOException, JetStreamApiException {
-    var names = nc.jetStreamManagement().getStreamNames();
-    System.out.println(names);
+  void publishing() {
     var await = Stream.range(0, count)
                       .map(String::valueOf)
                       .map(NatsCommandRepoIT::createCommand)

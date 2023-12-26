@@ -18,7 +18,7 @@ public class EventStatements {
   public static final DataType partitionKeyColType = DataTypes.TEXT;
   // cluster key (e.g event version)
   public static final String clusterKeyCol = "cluster_key_col";
-  public static final DataType clusterKeyColType = DataTypes.BIGINT;
+  public static final DataType clusterKeyColType = DataTypes.INT;
   // Payload
   public static final String payloadCol = "payload";
   public static final DataType payloadColType = DataTypes.TEXT;

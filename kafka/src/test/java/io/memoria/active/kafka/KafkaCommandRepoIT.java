@@ -44,7 +44,7 @@ class KafkaCommandRepoIT {
   @Test
   @Order(1)
   void stream() {
-    var size = stream.stream().peek(System.out::println).take(count).size();
+    var size = stream.stream().take(count).size();
     Assertions.assertThat(size).isEqualTo(count);
   }
 

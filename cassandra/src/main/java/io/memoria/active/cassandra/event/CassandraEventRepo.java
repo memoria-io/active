@@ -76,7 +76,7 @@ public class CassandraEventRepo implements EventRepo {
   }
 
   private List<Try<Event>> fetchEvents(String partitionKey) {
-    var st = EventStatements.fetchAll(keyspace, table, partitionKey, 0);
+    var st = EventStatements.fetchAll(keyspace, table, partitionKey, 0).setConsistencyLevel(readConsistency);
     var result = session.execute(st);
     return List.ofAll(result.all()).map(this::toEvent);
   }

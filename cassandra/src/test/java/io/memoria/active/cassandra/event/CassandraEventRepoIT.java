@@ -28,7 +28,7 @@ class CassandraEventRepoIT {
                                                                         KEYSPACE,
                                                                         TABLE,
                                                                         new SerializableTransformer());
-  private static final int COUNT = 100;
+  private static final int COUNT = 1000;
   private static final List<Event> rows = List.range(0, COUNT).map(SomeEvent::new);
 
   @BeforeAll

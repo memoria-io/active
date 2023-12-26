@@ -42,7 +42,7 @@ public class AggregateSystemTest {
   @ParameterizedTest
   @MethodSource("testArgs")
   void syncTest(ActorStore actorStore) {
-    System.out.println("Start actor system");
+    // System.out.println("Start actor system");
     var eventRepo = EventRepo.inMemory();
     var commandRepo = CommandRepo.inMemory();
     var actorFactory = new AggregateFactory(domain, eventRepo, commandRepo);
@@ -51,7 +51,7 @@ public class AggregateSystemTest {
       createActorIds().forEach(actorId -> {
         Awaitility.await().until(() -> {
           var size = eventRepo.size(StateId.of(actorId.value())).get();
-          System.out.printf("size: Actor: %s size: %d \n", actorId.value(), size);
+          // System.out.printf("size: Actor: %s size: %d \n", actorId.value(), size);
           return size == 2;
         });
       });

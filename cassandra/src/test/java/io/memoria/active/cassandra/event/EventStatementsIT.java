@@ -79,7 +79,7 @@ class EventStatementsIT {
   void getLast() {
     // When
     var lastSeq = session.execute(EventStatements.getLast(KEYSPACE, TABLE, PARTITION_KEY))
-                         .map(row -> row.get(EventStatements.clusterKeyCol, GenericType.BIG_INTEGER))
+                         .map(row -> row.getInt(EventStatements.clusterKeyCol))
                          .one();
     // Then
     Assertions.assertThat(lastSeq).isEqualTo(COUNT - 1);
