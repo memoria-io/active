@@ -9,7 +9,6 @@ import io.memoria.atom.core.text.TextTransformer;
 import io.memoria.atom.eventsourcing.Event;
 import io.memoria.atom.eventsourcing.StateId;
 import io.vavr.collection.List;
-import io.vavr.collection.Stream;
 import io.vavr.control.Option;
 import io.vavr.control.Try;
 
@@ -80,12 +79,6 @@ public class CassandraEventRepo implements EventRepo {
     var st = EventStatements.fetchAll(keyspace, table, partitionKey, 0);
     var result = session.execute(st);
     return List.ofAll(result.all()).map(this::toEvent);
-  }
-
-  private Stream<Event> streamEvents(String partitionKey) {
-    var st = EventStatements.fetchAll(keyspace, table, partitionKey, 0);
-    var result = session.execute(st);
-    return Stream.ofAll(result).map(this::toEvent).map(Try::get);
   }
 
   private Try<Event> toEvent(Row row) {

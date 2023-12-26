@@ -56,12 +56,11 @@ public class KafkaCommandRepo implements CommandRepo {
   @Override
   public Stream<Try<Command>> stream() {
     var consumer = new KafkaConsumer<String, String>(consumerConfig.toJavaMap());
-      consumer.subscribe(List.of(topic));
-      consumer.seekToBeginning(consumer.assignment());
-      return Stream.continually(() -> Stream.ofAll(consumer.poll(timeout)))
-                   .flatMap(Function1.identity())
+    consumer.subscribe(List.of(topic));
+    consumer.seekToBeginning(consumer.assignment());
+    return Stream.continually(() -> Stream.ofAll(consumer.poll(timeout))).flatMap(Function1.identity())
 
-                   .map(this::toCommand);
+                 .map(this::toCommand);
 
   }
 

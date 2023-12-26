@@ -33,11 +33,11 @@ class KafkaCommandRepoIT {
   @Order(0)
   void publishing() {
     var await = Stream.range(0, count)
-                  .map(String::valueOf)
-                  .map(KafkaCommandRepoIT::createCommand)
-                  .map(stream::publish)
-                  .map(Try::isSuccess)
-                  .forAll(b -> b);
+                      .map(String::valueOf)
+                      .map(KafkaCommandRepoIT::createCommand)
+                      .map(stream::publish)
+                      .map(Try::isSuccess)
+                      .forAll(b -> b);
     Awaitility.await().timeout(Duration.ofSeconds(10)).until(() -> await);
   }
 
