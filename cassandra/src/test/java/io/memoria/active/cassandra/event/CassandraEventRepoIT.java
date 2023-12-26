@@ -10,6 +10,7 @@ import io.memoria.atom.eventsourcing.EventId;
 import io.memoria.atom.eventsourcing.EventMeta;
 import io.memoria.atom.eventsourcing.StateId;
 import io.vavr.collection.List;
+import io.vavr.control.Try;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
@@ -50,10 +51,10 @@ class CassandraEventRepoIT {
   @Order(1)
   void stream() {
     // When
-    var result = repo.fetch(stateId).get().toJavaList();
+    var result = repo.fetch(stateId).toJavaList();
 
     // Then
-    Assertions.assertThat(result).containsExactlyElementsOf(rows);
+    Assertions.assertThat(result).containsExactlyElementsOf(rows.map(Try::success));
   }
 
   @Test
@@ -68,7 +69,7 @@ class CassandraEventRepoIT {
 
   private record SomeEvent(EventMeta meta) implements Event {
     public SomeEvent(int i) {
-      this(new EventMeta(EventId.of(i), i, StateId.of(i), CommandId.of(i)));
+      this(new EventMeta(EventId.of(i), i, stateId, CommandId.of(i)));
     }
   }
 }
