@@ -87,7 +87,7 @@ public class NatsCommandRepo implements CommandRepo {
 
   @Override
   public Stream<Try<Command>> stream() {
-    return Try.of(this::createSubscription).getOrElseGet(t -> {
+    return Try.of(this::streamCommands).getOrElseGet(t -> {
       log.error("Error while Creating subscription", t);
       return Stream.of(Try.failure(t));
     });
@@ -109,7 +109,7 @@ public class NatsCommandRepo implements CommandRepo {
     return transformer.deserialize(value, Command.class);
   }
 
-  private Stream<Try<Command>> createSubscription() throws JetStreamApiException, IOException {
+  private Stream<Try<Command>> streamCommands() throws JetStreamApiException, IOException {
     var sub = this.jetStream.subscribe(subjectName, subscribeOptions);
     return Stream.continually(() -> fetchMessages(sub, fetchBatchSize, fetchMaxWait))
                  .flatMap(Stream::ofAll)

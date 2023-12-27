@@ -6,11 +6,11 @@
     <parent>
         <groupId>io.memoria</groupId>
         <artifactId>active</artifactId>
-        <version>21.6.0</version>
+        <version>21.6.1</version>
     </parent>
     <groupId>io.memoria.active</groupId>
     <artifactId>web</artifactId>
-    <version>21.6.0</version>
+    <version>21.6.1</version>
     <packaging>jar</packaging>
     <name>${project.groupId}.${project.artifactId}</name>
     <description>Web Module</description>
